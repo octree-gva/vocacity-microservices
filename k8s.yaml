@@ -9,16 +9,8 @@ data:
   NAMESPACE: ""
   LOGLEVEL: info
   SERVICEDIR: services
-  
-  
-  
+
   TRANSPORTER: amqp://rabbitmq:5672
-  
-  
-  
-  
-  
-  
 
 ---
 #########################################################
@@ -32,8 +24,8 @@ spec:
   selector:
     app: api
   ports:
-  - port: 3000
-    targetPort: 3000
+    - port: 3000
+      targetPort: 3000
 
 ---
 #########################################################
@@ -47,16 +39,16 @@ metadata:
   #  kubernetes.io/ingress.class: nginx
 spec:
   rules:
-  - host: micro-voca.127.0.0.1.nip.io
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: api
-            port:
-              number: 3000
+    - host: micro-voca.127.0.0.1.nip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: api
+                port:
+                  number: 3000
 
 ---
 #########################################################
@@ -77,15 +69,15 @@ spec:
         app: api
     spec:
       containers:
-      - name: api
-        image: micro-voca
-        imagePullPolicy: IfNotPresent
-        envFrom:
-        - configMapRef:
-            name: common-env
-        env:
-          - name: SERVICES
-            value: api
+        - name: api
+          image: micro-voca
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: common-env
+          env:
+            - name: SERVICES
+              value: api
 
 ---
 #########################################################
@@ -106,19 +98,15 @@ spec:
         app: greeter
     spec:
       containers:
-      - name: greeter
-        image: micro-voca
-        imagePullPolicy: IfNotPresent
-        envFrom:
-        - configMapRef:
-            name: common-env
-        env:
-          - name: SERVICES
-            value: greeter
-
-
-
-
+        - name: greeter
+          image: micro-voca
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: common-env
+          env:
+            - name: SERVICES
+              value: greeter
 
 ---
 #########################################################
@@ -132,9 +120,9 @@ spec:
   selector:
     app: rabbitmq
   ports:
-  - port: 5672
-    name: rabbitmq
-    targetPort: 5672
+    - port: 5672
+      name: rabbitmq
+      targetPort: 5672
 
 ---
 #########################################################
@@ -150,18 +138,15 @@ spec:
       app: rabbitmq
   replicas: 1
   strategy:
-    type: Recreate  
+    type: Recreate
   template:
     metadata:
       labels:
         app: rabbitmq
     spec:
       containers:
-      - name: rabbitmq
-        image: rabbitmq:3
-        ports:
-        - containerPort: 5672
-          name: rabbitmq
-
-
-
+        - name: rabbitmq
+          image: rabbitmq:3
+          ports:
+            - containerPort: 5672
+              name: rabbitmq

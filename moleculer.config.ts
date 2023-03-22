@@ -190,12 +190,12 @@ const brokerConfig: BrokerOptions = {
 					// Sampler type. More info: https://www.jaegertracing.io/docs/1.14/sampling/#client-sampling-configuration
 					type: "Const",
 					// Sampler specific options.
-					options: {}
+					options: {},
 				},
 				// Additional options for `Jaeger.Tracer`
 				tracerOptions: {},
 				// Default tags. They will be added into all span tags.
-				defaultTags: null
+				defaultTags: null,
 			},
 		},
 	},
@@ -214,7 +214,6 @@ const brokerConfig: BrokerOptions = {
 
 	// Called after broker stopped.
 	// async stopped(broker: ServiceBroker): Promise<void> {},
-
 };
 
 export = brokerConfig;
