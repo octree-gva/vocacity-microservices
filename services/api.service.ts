@@ -1,9 +1,43 @@
 import { ApolloService } from "moleculer-apollo-server";
 import ApiGateway from "moleculer-web";
+import compression from "compression";
 
 export default {
 	name: "api",
+	settings: {
+		path: "/",
+		use: [compression()],
 
+		routes: [
+			/**
+			 * Static route
+			 */
+			{
+				path: "/",
+				use: [
+					// Serve static
+					ApiGateway.serveStatic("./public"),
+				],
+
+				// Action aliases
+				aliases: {},
+
+				mappingPolicy: "restrict",
+			},
+			{
+				path: "/jelastic",
+				use: [
+					// Serve static
+					ApiGateway.serveStatic("./jelastic-manifests"),
+				],
+
+				// Action aliases
+				aliases: {},
+
+				mappingPolicy: "restrict",
+			},
+		],
+	},
 	mixins: [
 		// Gateway
 		ApiGateway,

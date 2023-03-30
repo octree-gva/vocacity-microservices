@@ -1,25 +1,45 @@
-import jwt from "jsonwebtoken";
-import type { Context } from "moleculer";
-import { UserRegistrationAction, VocaError } from "../types";
-import { create400, create404 } from "../utils/createError";
+import type { QueryFilters } from "moleculer-db";
+import {
+	UserRegistrationAction,
+	VocaError,
+	User,
+	UserPermission,
+	UserLoginAction,
+	ServiceResponse,
+	ServiceDefinition,
+	Action,
+	UserResetPasswordAction,
+	IntrospectAction,
+	VocaResponse,
+} from "../types";
+import {
+	create400,
+	createSuccess,
+	createGraphql400,
+	createGraphql404,
+} from "../utils/createResponse";
+import { parse, sign } from "../utils/jwt";
 
-type User = {
-	uuid: string;
-	id: string;
-	email: string;
-	firstName: string;
-	lastName: string;
-};
+const serializePermissions = (perms: UserPermission[]) =>
+	perms.reduce(function (acc, next) {
+		const { permissions: permCsv } = next;
+		return acc.concat(
+			permCsv
+				.split(",")
+				.filter(Boolean)
+				.map((p: string) => `${next.organisation_id}.${p.trim()}`),
+		);
+	}, [] as string[]);
 
-type UserPermission = {
-	user_uuid: string;
-	organisation_uuid: string;
-	permissions: string
-}
-
-
-export default {
-	name: "user-permission",
+const UserPermissionsService: ServiceDefinition<{
+	register: UserRegistrationAction;
+	login: UserLoginAction;
+	profile: Action;
+	sendResetPassword: Omit<UserLoginAction, "password">;
+	resetPassword: UserResetPasswordAction;
+	introspect: IntrospectAction;
+}> = {
+	name: "user-permissions",
 	settings: {
 		graphql: {
 			type: `
@@ -37,6 +57,7 @@ export default {
                 Credential after a successfull authentication
                 """			
                 type UserPermission_AuthCredential {
+										code: Int!
                     jwt: String!
                 }
 
@@ -50,6 +71,16 @@ export default {
 		},
 	},
 	actions: {
+		introspect: {
+			params: {
+				token: "string",
+			},
+			async handler({ params }) {
+				const tk = parse(params.token);
+				if (tk.active) return createSuccess(tk);
+				else return create400();
+			},
+		},
 		register: {
 			params: {
 				email: "string",
@@ -64,39 +95,41 @@ export default {
                   register(email: String!, password: String!, passwordConfirmation: String!): UserPermission_AuthCredential
                 `,
 			},
-			async handler(ctx: Context<UserRegistrationAction>) {
-				if(ctx.params.password !== ctx.params.passwordConfirmation){
-					return create400("user_permissions.errors.passwords_dont_match")
+			handler: async (ctx) => {
+				const { params } = ctx;
+				if (params.password !== params.passwordConfirmation) {
+					throw createGraphql400("user_permissions.errors.passwords_dont_match");
 				}
-				const user: User = await ctx.call("users-data.register", {
-					email: ctx.params.email,
-					password: `${ctx.params.password}`,
+				const user: ServiceResponse<User> = await ctx.call("users-data.register", {
+					email: params.email,
+					password: `${params.password}`,
 				});
-				if (!user) {
-					return create404("user_permissions.errors.not_found")
-				}
-				// Get permissions: 
-				const permissions: UserPermission[] = await ctx.call("user-permissions-data.find", {
-					query: {
-						user_uuid: user.uuid
+				if (user.code > 300) {
+					const error = user as unknown as VocaError;
+					if (error.message === "unique_violation") {
+						throw createGraphql400("user_permissions.errors.email_taken");
 					}
-				});
+					throw createGraphql400("user_permissions.errors.unknown");
+				}
 
-				const jws = jwt.sign(
+				// Get permissions:
+				const permissions = await ctx.call<UserPermission[], QueryFilters>(
+					"user-permissions-data.find",
 					{
-						sub: user.uuid,
-						scope: permissions.reduce(function(acc, next){
-							const {permissions: permCsv} = next
-							return acc.concat(permCsv.split(",").filter(Boolean).map((p) => `${next.organisation_uuid}.${p.trim()}`))
-						}, [] as string[]),
-						data: {
-							email: user.email,
+						query: {
+							user_id: user.id,
 						},
 					},
-					process.env.JWT_SECRET || "changeMe",
-					{ expiresIn: 60 * 60 },
 				);
-				return { jwt: jws };
+				const jws = sign(
+					user.id,
+					serializePermissions(permissions),
+					{
+						email: user.email,
+					},
+					"user-permissions",
+				);
+				return createSuccess({ jwt: jws });
 			},
 		},
 		profile: {
@@ -108,13 +141,15 @@ export default {
                   profile: UserPermission_User
                 `,
 			},
-			async handler(ctx: Context<never>) {
+			params: {},
+			async handler() {
 				// TODO handle Bearer token.
+				return createSuccess();
 			},
 		},
 		login: {
 			params: {
-				email: "string",
+				email: "email",
 				password: "string",
 			},
 			graphql: {
@@ -125,26 +160,33 @@ export default {
                   login(email: String!, password: String!): UserPermission_AuthCredential
                 `,
 			},
-			async handler(ctx: Context<UserRegistrationAction>) {
+			async handler(ctx) {
+				const { params } = ctx;
 				const auth: User | undefined = await ctx.call("users-data.login", {
-					email: ctx.params.email,
-					password: ctx.params.password,
+					email: params.email,
+					password: params.password,
 				});
-				if (!auth) {
-					return { jwt: "", user: undefined };
+				if (!auth || !auth.id) {
+					throw createGraphql404();
 				}
-				// Get the permission 
-				const jws = jwt.sign(
+				const permissions = await ctx.call<UserPermission[], QueryFilters>(
+					"user-permissions-data.find",
 					{
-						sub: auth.uuid,
-						scope: [],
-						data: {
-							email: auth.email,
+						query: {
+							user_id: auth.id,
 						},
 					},
-					process.env.JWT_SECRET || "changeMe",
 				);
-				return { jwt: jws };
+				// Get the permission
+				const jws = sign(
+					auth.id,
+					serializePermissions(permissions),
+					{
+						email: `${auth.email}`,
+					},
+					"user-permissions",
+				);
+				return createSuccess({ jwt: jws });
 			},
 		},
 		sendResetPassword: {
@@ -159,8 +201,28 @@ export default {
                   sendResetPassword(email: String!): UserPermission_NoContent
                 `,
 			},
-			async handler(ctx: Context<UserRegistrationAction>) {
-				return true;
+			async handler(ctx) {
+				const { params } = ctx;
+				const matches: User[] = await ctx.call("users-data.find", {
+					query: {
+						email: params.email,
+					},
+				});
+				const [user] = matches;
+				if (!user || !user.id) {
+					return createSuccess({ ok: true });
+				}
+				const token = sign(`${user.id}`, ["reset_password"], {}, "user-permissions", 15);
+				try {
+					await ctx.call("mailer.send", {
+						data: { token },
+						to: `${user.email}`,
+						template: "user-permissions/reset_password_instructions",
+						language: "en",
+					});
+				} finally{
+					return createSuccess({ ok: true });
+				}
 			},
 		},
 		resetPassword: {
@@ -176,9 +238,24 @@ export default {
                   resetPassword(newPassword: String!, token: String!): UserPermission_NoContent
                 `,
 			},
-			handler(ctx: Context<UserRegistrationAction>) {
-				return true;
+			async handler(ctx) {
+				const { params } = ctx;
+				const parsedToken = parse(params.token);
+				if (!parsedToken.active) {
+					throw createGraphql400("user-permissions.errors.invalid_token");
+				}
+				if (!parsedToken.aud.includes("reset_password")) {
+					throw createGraphql400("user-permissions.errors.invalid_token");
+				}
+				const changedPassword: VocaResponse = await ctx.call("users-data.resetPassword", {
+					id: parsedToken.sub,
+					password: params.newPassword,
+				});
+				if (changedPassword.code > 300)
+					throw createGraphql400("user-permissions.errors.invalid_token");
+				return createSuccess({ ok: true });
 			},
 		},
 	},
 };
+export default UserPermissionsService;

@@ -15,11 +15,11 @@ export default {
 		define: {
 			name: Sequelize.STRING,
 			slug: Sequelize.STRING,
-			uuid: {
+			id: {
 				type: Sequelize.UUID,
 				defaultValue: Sequelize.UUIDV4,
 				primaryKey: true,
-			}
+			},
 		},
 		options: {
 			indexes: [{ unique: true, fields: ["slug"] }],

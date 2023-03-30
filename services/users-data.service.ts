@@ -4,30 +4,95 @@ import DbService from "moleculer-db";
 import type SequelizeDbAdapter from "moleculer-db-adapter-sequelize";
 import SqlAdapter from "moleculer-db-adapter-sequelize";
 import Sequelize from "sequelize";
-
-const saltRounds = 12;
+import { createSuccess, create400, create404 } from "../utils/createResponse";
+import type { ServiceDefinition, User } from "../types";
+const SALT_ROUND: number = 12;
 
 if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
 	throw new Error("Error: env DATABASE_URL is not defined.");
 }
-export default {
+const UserDataService: ServiceDefinition<{
+	register: { email: string; password: string };
+	login: { email: string; password: string };
+	resetPassword: { id: string; password: string };
+}> = {
 	name: "users-data",
 	mixins: [DbService],
 	adapter: new SqlAdapter(process.env.DATABASE_URL || "sqlite::memory"),
 	actions: {
-		async login(ctx: Context<{ email: string; password: string }>) {
-			const adapter = (this as any).adapter as SequelizeDbAdapter;
-			const match: any = await adapter.findOne({ where: { email: ctx.params.email } });
-			if (await bcrypt.compare(ctx.params.password, match.password)) {
-				return { id: `${match.id}`, email: match.email };
-			}
-			return undefined;
+		login: {
+			params: {
+				email: { type: "email" },
+				password: { type: "string", min: 4 },
+			},
+			async handler(ctx) {
+				const adapter = (this as any).adapter as SequelizeDbAdapter;
+				const match = (await adapter.findOne({
+					where: { email: `${ctx.params.email}` },
+				})) as unknown;
+				if (!match) {
+					return create404(`users-data.errors.not_found`);
+				}
+				const currentUser = match as Record<string, string>;
+				if (await bcrypt.compare(`${ctx.params.password}`, `${currentUser.password}`)) {
+					return createSuccess({
+						id: `${currentUser.id}`,
+						email: currentUser.email,
+					} as User);
+				}
+				return create404(`users-data.errors.not_found`);
+			},
 		},
-		async register(ctx: Context<{ email: string; password: string }>) {
-			const adapter = (this as any).adapter as SequelizeDbAdapter;
-			const salt = await bcrypt.genSalt(saltRounds);
-			const hashed = await bcrypt.hash(ctx.params.password, salt);
-			return adapter.insert({ email: ctx.params.email, password: `${hashed}` });
+		resetPassword: {
+			params: {
+				id: { type: "string", min: 4 },
+				password: { type: "string", min: 4 },
+			},
+			async handler(ctx) {
+				const adapter = (this as any).adapter as SequelizeDbAdapter;
+				const match = (await adapter.findOne({
+					where: { id: `${ctx.params.id}` },
+				})) as  User;
+				if (!match) {
+					return create404(`users-data.errors.not_found`, `${ctx.params.id} not found`);
+				}
+				const salt = await bcrypt.genSalt(SALT_ROUND);
+				const hashed = await bcrypt.hash(ctx.params.password, salt);
+				console.log("update", {match, password: `${hashed}`})
+				await adapter.updateMany({id: match.id}, { password: `${hashed}` });
+				return createSuccess();
+			},
+		},
+		register: {
+			params: {
+				email: { type: "email" },
+				password: { type: "string", min: 4 },
+			},
+			async handler(ctx) {
+				const adapter = (this as any).adapter as SequelizeDbAdapter;
+				const salt = await bcrypt.genSalt(SALT_ROUND);
+				const hashed = await bcrypt.hash(ctx.params.password, salt);
+
+				try {
+					const user = (await adapter.insert({
+						email: ctx.params.email,
+						password: `${hashed}`,
+					})) as unknown as { dataValues: any };
+					return createSuccess({
+						id: user?.dataValues.id,
+						email: user?.dataValues.email,
+					} as User);
+				} catch (e) {
+					const errors = e?.errors || [];
+					if (errors.length > 0) {
+						return create400(
+							"users-data.error",
+							errors.map((e: any) => `${e.type}`.replaceAll(" ", "_")).join(","),
+						);
+					}
+					return create400("users-data.error");
+				}
+			},
 		},
 	},
 	model: {
@@ -39,7 +104,7 @@ export default {
 			firstName: Sequelize.STRING,
 			lastName: Sequelize.STRING,
 			sub: Sequelize.STRING,
-			uuid: {
+			id: {
 				type: Sequelize.UUID,
 				defaultValue: Sequelize.UUIDV4,
 				primaryKey: true,
@@ -51,3 +116,4 @@ export default {
 		},
 	},
 };
+export default UserDataService;
