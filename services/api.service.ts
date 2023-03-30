@@ -1,39 +1,70 @@
-"use strict";
+import { ApolloService } from "moleculer-apollo-server";
+import ApiGateway from "moleculer-web";
+import compression from "compression";
 
-const ApiGateway 	= require("moleculer-web");
-const { ApolloService } = require("moleculer-apollo-server");
+export default {
+	name: "api",
+	settings: {
+		path: "/",
+		use: [compression()],
 
-module.exports = {
-    name: "api",
+		routes: [
+			/**
+			 * Static route
+			 */
+			{
+				path: "/",
+				use: [
+					// Serve static
+					ApiGateway.serveStatic("./public"),
+				],
 
-    mixins: [
-        // Gateway
-        ApiGateway,
+				// Action aliases
+				aliases: {},
 
-        // GraphQL Apollo Server
-        ApolloService({
+				mappingPolicy: "restrict",
+			},
+			{
+				path: "/jelastic",
+				use: [
+					// Serve static
+					ApiGateway.serveStatic("./jelastic-manifests"),
+				],
 
-            // Global GraphQL typeDefs
-            typeDefs: ``,
+				// Action aliases
+				aliases: {},
 
-            // Global resolvers
-            resolvers: {},
+				mappingPolicy: "restrict",
+			},
+		],
+	},
+	mixins: [
+		// Gateway
+		ApiGateway,
 
-            // API Gateway route options
-            routeOptions: {
-                path: "/graphql",
-                cors: true,
-                mappingPolicy: "restrict"
-            },
+		// GraphQL Apollo Server
+		ApolloService({
+			// Global GraphQL typeDefs
+			typeDefs: ``,
 
-            // https://www.apollographql.com/docs/apollo-server/v2/api/apollo-server.html
-            serverOptions: {
-                tracing: true,
+			// Global resolvers
+			resolvers: {},
 
-                engine: {
-                    apiKey: process.env.APOLLO_ENGINE_KEY
-                }
-            }
-        })
-    ]
+			// API Gateway route options
+			routeOptions: {
+				path: "/graphql",
+				cors: true,
+				mappingPolicy: "restrict",
+			},
+
+			// https://www.apollographql.com/docs/apollo-server/v2/api/apollo-server.html
+			serverOptions: {
+				tracing: true,
+
+				engine: {
+					apiKey: process.env.APOLLO_ENGINE_KEY,
+				},
+			},
+		}),
+	],
 };
