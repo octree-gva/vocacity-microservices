@@ -24,18 +24,6 @@ export default {
 
 				mappingPolicy: "restrict",
 			},
-			{
-				path: "/jelastic",
-				use: [
-					// Serve static
-					ApiGateway.serveStatic("./jelastic-manifests"),
-				],
-
-				// Action aliases
-				aliases: {},
-
-				mappingPolicy: "restrict",
-			},
 		],
 	},
 	mixins: [

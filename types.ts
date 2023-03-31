@@ -41,6 +41,12 @@ export type IntrospectAction = Action & {
 	token: string;
 };
 
+export type DeployAction = Action & {
+	manifestUrl: string;
+	settings: Record<string, string|number>,
+	protectedSettings: string[]
+}
+
 export type Credential = Thing & {
 	jwt: string;
 };
@@ -73,7 +79,10 @@ export type User = Thing & {
 	firstName: string;
 	lastName: string;
 };
-
+export type Organization = Thing & {
+	id: string;
+	name: string;
+}
 export type UserPermission = {
 	user_id: string;
 	user?: User;

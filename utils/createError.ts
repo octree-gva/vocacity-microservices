@@ -20,7 +20,10 @@ export const create404 = (
 	i18nMessage: VocaError["i18nMessage"] = "errors.requests.not_found",
 	message: VocaError["message"] = "",
 ) => createError(404, i18nMessage, message);
-
+export const create500 = (
+	i18nMessage: VocaError["i18nMessage"] = "errors.requests.internal",
+	message: VocaError["message"] = "",
+) => createError(500, i18nMessage, message);
 export const createGraphql400 = (
 	i18nMessage: VocaError["i18nMessage"] = "errors.requests.bad_request",
 ) => {
