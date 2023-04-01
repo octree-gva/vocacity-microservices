@@ -1,0 +1,29 @@
+# /bin/sh
+##
+# RUN this script with your voca password
+# VAULT_PASSWORD="salut" /tmp/setup
+##
+echo "setup dev instance of vault"
+apk add jq
+touch accessor_test.txt
+touch entity_id.txt
+
+vault login $VAULT_DEV_ROOT_TOKEN_ID
+vault policy write internals /tmp/policies/voca-internals.hcl
+vault auth enable -path="secret/voca" userpass
+vault write auth/secret/voca/users/voca password="$VAULT_PASSWORD" policies="internals"
+vault auth list -format=json | jq -r '.["secret/voca/"].accessor' > ./accessor_test.txt
+vault write -format=json identity/entity name="voca" policies="internals" | jq -r ".data.id" > ./entity_id.txt
+vault write identity/entity-alias name="voca" \
+     canonical_id=$(cat entity_id.txt) \
+     mount_accessor=$(cat accessor_test.txt) \
+     custom_metadata=account="Voca Service"
+
+echo ""
+echo "Voca Service"
+echo "username: voca"
+echo "password: $VAULT_PASSWORD"
+echo ""
+echo "This is a DEV script only. Don't do this on production"
+
+rm accessor_test.txt entity_id.txt

@@ -1,53 +1,36 @@
 version: "3.3"
 
 services:
-  api:
-    build:
-      context: .
-    image: voca-moleculer
-    env_file: docker-compose.env
-    environment:
-      SERVICES: api
-      PORT: 3000
-    depends_on:
-      - nats
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api-gw.rule=PathPrefix(`/`)"
-      - "traefik.http.services.api-gw.loadbalancer.server.port=3000"
+  
+  redis:
+    image: redis:7.0.9-alpine
+    ports:
+      - 6379:6379
     networks:
-      - internal
-
-  user-permission:
-    build:
-      context: .
-    image: voca-moleculer
-    env_file: docker-compose.env
-    environment:
-      SERVICES: user-permission
-    depends_on:
-      - nats
-    networks:
-      - internal
+      - default
 
   nats:
     image: nats:2.8
     networks:
-      - internal
+      - default
 
-  traefik:
-    image: traefik:v2.4
-    command:
-      - "--api.insecure=true" # Don't do that in production!
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
+  vault:
+    image: hashicorp/vault:1.13
     ports:
-      - 3000:80
-      - 3001:8080
+      - "8200:8200"
+    environment:
+      VAULT_ADDR: "http://0.0.0.0:8200"
+      VAULT_DEV_ROOT_TOKEN_ID: "pleaseChangeMe"
+      VAULT_LOG_LEVEL: "debug"
+      # To setup your dev instance:
+      # docker exec -it <my vault> sh
+      # export VAULT_PASSWORD="<see your .env>"
+      # /tmp/setup
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./contrib/vault:/tmp:rw
+    cap_add:
+      - IPC_LOCK
     networks:
-      - internal
       - default
 
 networks:

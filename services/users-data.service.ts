@@ -1,5 +1,4 @@
 import * as bcrypt from "bcrypt";
-import type { Context } from "moleculer";
 import DbService from "moleculer-db";
 import type SequelizeDbAdapter from "moleculer-db-adapter-sequelize";
 import SqlAdapter from "moleculer-db-adapter-sequelize";
@@ -58,7 +57,6 @@ const UserDataService: ServiceDefinition<{
 				}
 				const salt = await bcrypt.genSalt(SALT_ROUND);
 				const hashed = await bcrypt.hash(ctx.params.password, salt);
-				console.log("update", {match, password: `${hashed}`})
 				await adapter.updateMany({id: match.id}, { password: `${hashed}` });
 				return createSuccess();
 			},

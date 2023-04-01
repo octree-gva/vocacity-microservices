@@ -1,12 +1,14 @@
 // typescript ontology for voca, used around the project
 
 import type { Context, GenericObject } from "moleculer";
-
+import type {Job} from 'bullmq'
 export type Thing = {};
 export type Action = Thing;
 export type ServiceHandlerFun<T extends Action> = (
 	ctx: Context<T, {}, GenericObject>,
 ) => Promise<VocaResponse>;
+
+type KeysOfType<T, U> = { [K in keyof T]: K }[keyof T];
 export type ServiceDefinition<T extends Record<string, Action>> = Thing & {
 	name: string;
 	mixins?: unknown[];
@@ -14,8 +16,10 @@ export type ServiceDefinition<T extends Record<string, Action>> = Thing & {
 	adapter?: unknown;
 	actions: {
 		[K in keyof T]: {
-			params?: Record<string, Record<string, string | number> | string>;
+			queue?: true,
+			params?: Record< keyof T[K], Record<string, string | number> | string>;
 			graphql?: unknown;
+			localQueue?: <S extends KeysOfType<T, 'string'>>(ctx: Context<T[K], {}, GenericObject>, event: S, payload: T[S], options: { priority: number }) => Promise<Job>;
 			handler: ServiceHandlerFun<T[K]>;
 		};
 	};
@@ -42,9 +46,14 @@ export type IntrospectAction = Action & {
 };
 
 export type DeployAction = Action & {
-	manifestUrl: string;
-	settings: Record<string, string|number>,
-	protectedSettings: string[]
+	template: string;
+}
+export type VaultGetAction = Action & {
+	bucket: string;
+	key: string;
+}
+export type VaultSetAction = VaultGetAction & {
+	secrets: Record<string, string>
 }
 
 export type Credential = Thing & {
