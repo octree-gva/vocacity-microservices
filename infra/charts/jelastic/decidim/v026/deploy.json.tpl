@@ -18,7 +18,7 @@
         "APP_SESSION_KEY": "{{ vault.gen("rails.app_session_key", 128) }}",
         "SECRET_KEY_BASE":  "{{ vault.gen("rails.secret_key_base", 128) }}",
         "MASTER_KEY": "{{ vault.gen("rails.master_key", 128) }}",
-        "DECIDIM_IMAGE": "octree/voca-decidim-public:0.26-alpine"
+        "DECIDIM_IMAGE": "octree/voca-decidim:0.26-latest"
     },
     "nodes": [
         {
