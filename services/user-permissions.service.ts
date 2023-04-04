@@ -113,18 +113,20 @@ const UserPermissionsService: ServiceDefinition<{
 					throw createGraphql400("user_permissions.errors.unknown");
 				}
 				// create self organisation, and attribute a permission
-				const selfOrg = await ctx.call<Organization, Partial<Organization>>("organisations-data.create", {name: params.email})
-				await ctx.call<UserPermission, {entity:Partial<UserPermission>}>(
+				const selfOrg = await ctx.call<Organization, Partial<Organization>>(
+					"organisations-data.create",
+					{ name: params.email },
+				);
+				await ctx.call<UserPermission, { entity: Partial<UserPermission> }>(
 					"user-permissions-data.insert",
 					{
-						entity:{
+						entity: {
 							user_id: user.id,
 							organisation_id: selfOrg.id,
-							permissions: "admin"
-
-						}
-					}
-				)
+							permissions: "admin",
+						},
+					},
+				);
 
 				// Get permissions:
 				const permissions = await ctx.call<UserPermission[], QueryFilters>(
@@ -191,7 +193,7 @@ const UserPermissionsService: ServiceDefinition<{
 						},
 					},
 				);
-				console.log({id: auth.id, permissions})
+				console.log({ id: auth.id, permissions });
 
 				// Get the permission
 				const jws = sign(
@@ -236,7 +238,7 @@ const UserPermissionsService: ServiceDefinition<{
 						template: "user-permissions/reset_password_instructions",
 						language: "en",
 					});
-				} finally{
+				} finally {
 					return createSuccess({ ok: true });
 				}
 			},

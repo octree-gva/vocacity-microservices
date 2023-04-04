@@ -40,7 +40,10 @@
                 "DECIDIM_RUN_PUMA": "1",
                 "DECIDIM_RUN_SIDEKIQ": "1",
                 "DECIDIM_RUN_GRPC": "1",
-                "DECIDIM_RUN_CRON": "1"
+                "DECIDIM_RUN_CRON": "1",
+                "SMTP_ADDRESS": "{{ vault.internal("smtp.address" )}}",
+                "SMTP_USERNAME": "{{ vault.internal("smtp.username" )}}",
+                "SMTP_PASSWORD": "{{ vault.internal("smtp.password" )}}"
             },
             "links": [
                 "sqldb:psql",

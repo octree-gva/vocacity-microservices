@@ -4,30 +4,28 @@ import Sequelize from "sequelize";
 import { Organization, ServiceDefinition, UserPermission } from "../types";
 import { create500, createSuccess } from "../utils/createResponse";
 import type SequelizeDbAdapter from "moleculer-db-adapter-sequelize";
-import {v4 as uuid} from 'uuid'
+import { v4 as uuid } from "uuid";
 if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
 	throw new Error("Error: env DATABASE_URL is not defined.");
 }
 /**
- * in an ideal world, we would use uuidv4 to define ids. 
+ * in an ideal world, we would use uuidv4 to define ids.
  * BUT jelastic infrastructure have a limitation in 23 chars
- * for ids, so we need to define a custom function that will: 
+ * for ids, so we need to define a custom function that will:
  * - ensure first char is a letter
  * - ensure the slug will always be 22 chars
- * 
+ *
  * @param str whatever text
  */
-const toSlug = (str: string|number) =>  {
-	let temp = `${str}`.replace(/[^a-zA-Z0-9]/g,"").toLowerCase();
+const toSlug = (str: string | number) => {
+	let temp = `${str}`.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
-	if(temp[0] < 'a' || temp[0] > 'z')
-		temp = `w${temp}`
-	while(temp.length < 20)
-		temp += `${+new Date()}`
-	return temp.substring(0,22)
-}
+	if (temp[0] < "a" || temp[0] > "z") temp = `w${temp}`;
+	while (temp.length < 20) temp += `${+new Date()}`;
+	return temp.substring(0, 22);
+};
 const OrganizationsDataService: ServiceDefinition<{
-	create: {name: string},
+	create: { name: string };
 }> = {
 	name: "organisations-data",
 	mixins: [DbService],
@@ -39,20 +37,20 @@ const OrganizationsDataService: ServiceDefinition<{
 			},
 			async handler(ctx) {
 				const adapter = (this as any).adapter as SequelizeDbAdapter;
-				let slug=toSlug(uuid())
+				let slug = toSlug(uuid());
 				// not 100% uniq, but good enough for now.
-				while(true){
+				while (true) {
 					const result = await adapter.find({
 						query: {
-							id: slug
-						}
-					})
-					if(result.length == 0) break;
-					slug=toSlug(uuid())
+							id: slug,
+						},
+					});
+					if (result.length == 0) break;
+					slug = toSlug(uuid());
 				}
 				const match = (await adapter.insert({
 					name: ctx.params.name,
-					id: slug
+					id: slug,
 				})) as unknown as Organization;
 				if (!match) {
 					return create500(`organizationss-data.errors.not_found`);
@@ -60,7 +58,7 @@ const OrganizationsDataService: ServiceDefinition<{
 				return createSuccess({
 					id: match.id,
 					name: match.name,
-				} as Organization)
+				} as Organization);
 			},
 		},
 	},

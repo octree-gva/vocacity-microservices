@@ -1,7 +1,6 @@
 version: "3.3"
 
 services:
-  
   redis:
     image: redis:7.0.9-alpine
     ports:
@@ -32,9 +31,6 @@ services:
       - IPC_LOCK
     networks:
       - default
-
-networks:
-  internal:
 
 volumes:
   data:

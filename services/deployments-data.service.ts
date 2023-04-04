@@ -7,7 +7,7 @@ if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
 	throw new Error("Error: env DATABASE_URL is not defined.");
 }
 
-const DeploymentsData : ServiceDefinition<{}> = {
+const DeploymentsData: ServiceDefinition<{}> = {
 	name: "deployments-data",
 	mixins: [DbService],
 	adapter: new SqlAdapter(process.env.DATABASE_URL || "sqlite::memory"),
