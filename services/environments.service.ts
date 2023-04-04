@@ -1,9 +1,11 @@
-import { ServiceDefinition, ParkAction, VaultSetAction } from "../types";
+import { ServiceDefinition, InspectAction, SetLabelsAction } from "../types";
 import { create400, createSuccess } from "../utils/createResponse";
 import type { Job } from "bullmq";
 import BullMqMixin from "moleculer-bullmq";
 import _ from "lodash";
+import jelastic from "../utils/jelastic";
 import serializeJob from "../utils/serializeJob";
+import { compileChart, random } from "../utils/deployments";
 
 /**
  * Park instances from an infrastructure chart.
@@ -16,24 +18,34 @@ import serializeJob from "../utils/serializeJob";
  * A park is an instance that is linked to no Organisation (for now).
  *
  */
-const JobsService: ServiceDefinition<{
-	status: { name: string; id: Job["id"] };
+const EnvironmentService: ServiceDefinition<{
+	inspect: InspectAction;
+    setLabels: SetLabelsAction;
 }> = {
-	name: "jobs",
+	name: "environment",
 	settings: {
 		bullmq: {
 			client: process.env.BULL_REDIS_URL,
-			worker: { concurrency: 1 },
 		},
 	},
 	mixins: [BullMqMixin],
 	actions: {
-		status: {
+        setLabels: {
+            params: {
+                envName: "string",
+                labels: "object"
+            },
+            async handler(ctx) {
+                return createSuccess()
+            }
+        },
+		inspect: {
+			params: {},
 			async handler(ctx) {
-				const job = await (this as any).job(ctx.params.name, ctx.params.id);
-				return createSuccess(await serializeJob(job));
+				const environments = await jelastic.inspect();
+				return createSuccess({data: environments});
 			},
 		},
 	},
 };
-export default JobsService;
+export default EnvironmentService;

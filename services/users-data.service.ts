@@ -51,13 +51,13 @@ const UserDataService: ServiceDefinition<{
 				const adapter = (this as any).adapter as SequelizeDbAdapter;
 				const match = (await adapter.findOne({
 					where: { id: `${ctx.params.id}` },
-				})) as  User;
+				})) as User;
 				if (!match) {
 					return create404(`users-data.errors.not_found`, `${ctx.params.id} not found`);
 				}
 				const salt = await bcrypt.genSalt(SALT_ROUND);
 				const hashed = await bcrypt.hash(ctx.params.password, salt);
-				await adapter.updateMany({id: match.id}, { password: `${hashed}` });
+				await adapter.updateMany({ id: match.id }, { password: `${hashed}` });
 				return createSuccess();
 			},
 		},

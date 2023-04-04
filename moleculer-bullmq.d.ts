@@ -1,1 +1,1 @@
-declare module 'moleculer-bullmq';
+declare module "moleculer-bullmq";

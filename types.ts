@@ -1,7 +1,7 @@
 // typescript ontology for voca, used around the project
 
 import type { Context, GenericObject } from "moleculer";
-import type {Job} from 'bullmq'
+import type { Job } from "bullmq";
 export type Thing = {};
 export type Action = Thing;
 export type ServiceHandlerFun<T extends Action> = (
@@ -16,10 +16,23 @@ export type ServiceDefinition<T extends Record<string, Action>> = Thing & {
 	adapter?: unknown;
 	actions: {
 		[K in keyof T]: {
-			queue?: true | (<S extends KeysOfType<T, 'string'>>(ctx: Context<T[K], {}, GenericObject>, queue: string, event: S, payload: T[S], options: { priority: number }) => Promise<Job>),
-			params?: Record< keyof T[K], Record<string, string | number> | string>;
+			queue?:
+				| true
+				| (<S extends KeysOfType<T, "string">>(
+						ctx: Context<T[K], {}, GenericObject>,
+						queue: string,
+						event: S,
+						payload: T[S],
+						options: { priority: number },
+				  ) => Promise<Job>);
+			params?: Record<keyof T[K], Record<string, string | number> | string>;
 			graphql?: unknown;
-			localQueue?: <S extends KeysOfType<T, 'string'>>(ctx: Context<T[K], {}, GenericObject>, event: S, payload: T[S], options: { priority: number }) => Promise<Job>;
+			localQueue?: <S extends KeysOfType<T, "string">>(
+				ctx: Context<T[K], {}, GenericObject>,
+				event: S,
+				payload: T[S],
+				options: { priority: number },
+			) => Promise<Job>;
 			handler: ServiceHandlerFun<T[K]>;
 		};
 	};
@@ -47,14 +60,20 @@ export type IntrospectAction = Action & {
 
 export type ParkAction = Action & {
 	template: string;
+};
+
+export type InspectAction = Action & {};
+export type SetLabelsAction = Action & {
+	envName: string
+	labels: Record<string, string>
 }
 export type VaultGetAction = Action & {
 	bucket: string;
 	key: string;
-}
+};
 export type VaultSetAction = VaultGetAction & {
-	secrets: Record<string, string>
-}
+	secrets: Record<string, string>;
+};
 
 export type Credential = Thing & {
 	jwt: string;
@@ -91,7 +110,7 @@ export type User = Thing & {
 export type Organization = Thing & {
 	id: string;
 	name: string;
-}
+};
 export type UserPermission = {
 	user_id: string;
 	user?: User;

@@ -1,1 +1,1 @@
-export {default} from './vault'
+export { default } from "./vault";

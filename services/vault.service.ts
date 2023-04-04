@@ -1,14 +1,6 @@
-import {
-	ServiceDefinition,
-	VaultGetAction,
-	VaultSetAction,
-} from "../types";
-import {
-  create400,
-  create404,
-	createSuccess,
-} from "../utils/createResponse";
-import _ from 'lodash'
+import { ServiceDefinition, VaultGetAction, VaultSetAction } from "../types";
+import { create400, create404, createSuccess } from "../utils/createResponse";
+import _ from "lodash";
 import vault from "../utils/vault";
 
 const VaultService: ServiceDefinition<{
@@ -16,39 +8,42 @@ const VaultService: ServiceDefinition<{
 	get: VaultGetAction;
 }> = {
 	name: "vault",
-  settings: {
-  },
+	settings: {},
 	actions: {
-    get: {
-      params: {
-        bucket: "string",
-        key: "string"
-      }, 
-      async handler(ctx) {
-        const v = await vault();
-        const {data, metadata} = await v.read(`voca/users/${ctx.params.bucket}/${ctx.params.key}`)
-        if(!!metadata?.destroyed)
-          throw create404();
-        return createSuccess(data)
-      }
-    },
-    set:{
-      params: {
-        "bucket": "string",
-        "key": "string",
-        "secrets": "object"
-      },
-      async handler(ctx) {
-        try{
-          const v = await vault()
-          v.write(`voca/users/${ctx.params.bucket}/${ctx.params.key}`, ctx.params.secrets)
-        }catch(e){
-          console.error(e)
-          return create400()
-        }
-        return createSuccess()
-      }
-    }
-  },
+		get: {
+			params: {
+				bucket: "string",
+				key: "string",
+			},
+			async handler(ctx) {
+				const v = await vault();
+				const { data, metadata } = await v.read(
+					`voca/users/${ctx.params.bucket}/${ctx.params.key}`,
+				);
+				if (!!metadata?.destroyed) throw create404();
+				return createSuccess(data);
+			},
+		},
+		set: {
+			params: {
+				bucket: "string",
+				key: "string",
+				secrets: "object",
+			},
+			async handler(ctx) {
+				try {
+					const v = await vault();
+					v.write(
+						`voca/users/${ctx.params.bucket}/${ctx.params.key}`,
+						ctx.params.secrets,
+					);
+				} catch (e) {
+					console.error(e);
+					return create400();
+				}
+				return createSuccess();
+			},
+		},
+	},
 };
 export default VaultService;
