@@ -46,7 +46,7 @@ export const responseInterceptor = (response: AxiosResponse<any>) => {
   const { status, data } = response;
   if (status >= 200 && status <= 300) {
     if (data.error) {
-      console.log(response)
+      console.log("ERROR", {dataKeys: Object.keys(data), errorKeys: Object.keys(data.error || {})})
       throw Error(JSON.stringify(data?.error || `Error status ${status}`));
     }
     return { ...response, error: null };

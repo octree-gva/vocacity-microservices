@@ -33,8 +33,5 @@ services:
     networks:
       - default
 
-networks:
-  internal:
-
 volumes:
   data:

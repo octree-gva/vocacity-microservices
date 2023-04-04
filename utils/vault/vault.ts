@@ -12,7 +12,7 @@ const getVault = async () => {
       );
   }catch(e){
     console.error({user: process.env.VAULT_USER, password: process.env.VAULT_PASSWORD, mountPath })
-    throw new Error("Can not login to the vault")
+    throw new Error("errors.vault.login_error")
   }
   return {
     read: curryRead(token),

@@ -66,7 +66,11 @@ const install: InstallFn = async ({
     const response = await request.post('/marketplace/jps/rest/install', body);
     return response.data;
   }catch(e){
-    console.error(e)
+    const {code} = e;
+    if(code === "EHOSTUNREACH"){
+      // Jelastic is not available, try later
+      throw new Error("errors.infra.not_availabale");
+    }
     throw new Error("Error installing jelastic manifest")
   }
 };

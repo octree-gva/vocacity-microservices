@@ -5,7 +5,7 @@ import type {Job} from 'bullmq'
 export type Thing = {};
 export type Action = Thing;
 export type ServiceHandlerFun<T extends Action> = (
-	ctx: Context<T, {}, GenericObject>,
+	ctx: Context<T, Record<string, string>, GenericObject>,
 ) => Promise<VocaResponse>;
 
 type KeysOfType<T, U> = { [K in keyof T]: K }[keyof T];
@@ -16,7 +16,7 @@ export type ServiceDefinition<T extends Record<string, Action>> = Thing & {
 	adapter?: unknown;
 	actions: {
 		[K in keyof T]: {
-			queue?: true,
+			queue?: true | (<S extends KeysOfType<T, 'string'>>(ctx: Context<T[K], {}, GenericObject>, queue: string, event: S, payload: T[S], options: { priority: number }) => Promise<Job>),
 			params?: Record< keyof T[K], Record<string, string | number> | string>;
 			graphql?: unknown;
 			localQueue?: <S extends KeysOfType<T, 'string'>>(ctx: Context<T[K], {}, GenericObject>, event: S, payload: T[S], options: { priority: number }) => Promise<Job>;
@@ -45,7 +45,7 @@ export type IntrospectAction = Action & {
 	token: string;
 };
 
-export type DeployAction = Action & {
+export type ParkAction = Action & {
 	template: string;
 }
 export type VaultGetAction = Action & {
