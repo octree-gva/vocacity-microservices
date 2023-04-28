@@ -1,5 +1,6 @@
 import type { Job } from "bullmq";
 import { create404 } from "./createError";
+
 const serializeJob = async (job: Job) => {
 	if (!job) {
 		return create404();
@@ -10,7 +11,7 @@ const serializeJob = async (job: Job) => {
 		id: job.id,
 		action: `${serviceName}.${job.name}`,
 		queue: job?.queueName,
-		status: status,
+		status,
 		data: (job.data || {}).params,
 		failedReason: job.failedReason,
 		progress: job.progress,

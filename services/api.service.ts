@@ -1,6 +1,6 @@
+import compression from "compression";
 import { ApolloService } from "moleculer-apollo-server";
 import ApiGateway from "moleculer-web";
-import compression from "compression";
 
 export default {
 	name: "api",
@@ -23,6 +23,12 @@ export default {
 				aliases: {},
 
 				mappingPolicy: "restrict",
+			},
+			{
+				path: "/services",
+				aliases: {
+					dns: "dns.routing",
+				},
 			},
 		],
 	},

@@ -1,5 +1,10 @@
-import request, { VaultResponse } from "./request";
-const curryRead =
+import type { VaultResponse } from "./request";
+import request from "./request";
+
+export type Read = (path: string) => Promise<NonNullable<VaultResponse["data"]>>;
+export type CurryRead = (token: string, mountPath?: string) => Read;
+
+const curryRead: CurryRead =
 	(token: string, mountPath = "secret") =>
 	async (path: string) => {
 		const { error, ...secrets } = await request.get<any, VaultResponse>(
@@ -10,7 +15,9 @@ const curryRead =
 				},
 			},
 		);
-		if (secrets.data) return secrets.data;
+		if (!error && !!secrets?.data) {
+			return secrets.data;
+		}
 		return {};
 	};
 

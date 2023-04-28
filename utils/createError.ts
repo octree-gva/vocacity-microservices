@@ -26,16 +26,14 @@ export const create500 = (
 ) => createError(500, i18nMessage, message);
 export const createGraphql400 = (
 	i18nMessage: VocaError["i18nMessage"] = "errors.requests.bad_request",
-) => {
-	return new GraphQLError(i18nMessage, undefined, undefined, undefined, undefined, undefined, {
+) =>
+	new GraphQLError(i18nMessage, undefined, undefined, undefined, undefined, undefined, {
 		code: "BAD_USER_INPUT",
 	});
-};
 export const createGraphql404 = (
 	i18nMessage: VocaError["i18nMessage"] = "errors.requests.not_found",
-) => {
-	return new GraphQLError(i18nMessage, undefined, undefined, undefined, undefined, undefined, {
+) =>
+	new GraphQLError(i18nMessage, undefined, undefined, undefined, undefined, undefined, {
 		code: "BAD_USER_INPUT",
 	});
-};
 export default createError;

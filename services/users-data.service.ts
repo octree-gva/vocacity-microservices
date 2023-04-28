@@ -3,9 +3,10 @@ import DbService from "moleculer-db";
 import type SequelizeDbAdapter from "moleculer-db-adapter-sequelize";
 import SqlAdapter from "moleculer-db-adapter-sequelize";
 import Sequelize from "sequelize";
-import { createSuccess, create400, create404 } from "../utils/createResponse";
 import type { ServiceDefinition, User } from "../types";
-const SALT_ROUND: number = 12;
+import { create400, create404, createSuccess } from "../utils/createResponse";
+
+const SALT_ROUND = 12;
 
 if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
 	throw new Error("Error: env DATABASE_URL is not defined.");

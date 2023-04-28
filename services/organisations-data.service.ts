@@ -1,10 +1,12 @@
 import DbService from "moleculer-db";
 import SqlAdapter from "moleculer-db-adapter-sequelize";
-import Sequelize from "sequelize";
-import { Organization, ServiceDefinition, UserPermission } from "../types";
-import { create500, createSuccess } from "../utils/createResponse";
 import type SequelizeDbAdapter from "moleculer-db-adapter-sequelize";
+import Sequelize from "sequelize";
 import { v4 as uuid } from "uuid";
+import type { Organization, ServiceDefinition } from "../types";
+import { UserPermission } from "../types";
+import { create500, createSuccess } from "../utils/createResponse";
+
 if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
 	throw new Error("Error: env DATABASE_URL is not defined.");
 }
@@ -20,8 +22,12 @@ if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
 const toSlug = (str: string | number) => {
 	let temp = `${str}`.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
-	if (temp[0] < "a" || temp[0] > "z") temp = `w${temp}`;
-	while (temp.length < 20) temp += `${+new Date()}`;
+	if (temp[0] < "a" || temp[0] > "z") {
+		temp = `w${temp}`;
+	}
+	while (temp.length < 20) {
+		temp += `${+new Date()}`;
+	}
 	return temp.substring(0, 22);
 };
 const OrganizationsDataService: ServiceDefinition<{
@@ -45,7 +51,9 @@ const OrganizationsDataService: ServiceDefinition<{
 							id: slug,
 						},
 					});
-					if (result.length == 0) break;
+					if (result.length == 0) {
+						break;
+					}
 					slug = toSlug(uuid());
 				}
 				const match = (await adapter.insert({

@@ -1,7 +1,7 @@
 import DbService from "moleculer-db";
 import SqlAdapter from "moleculer-db-adapter-sequelize";
 import Sequelize from "sequelize";
-import { ServiceDefinition } from "../types";
+import type { ServiceDefinition } from "../types";
 
 if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
 	throw new Error("Error: env DATABASE_URL is not defined.");

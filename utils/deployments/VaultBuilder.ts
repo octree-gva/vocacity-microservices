@@ -1,8 +1,11 @@
 import { randomBytes } from "crypto";
 import _ from "lodash";
+
 class VaultBuilder {
 	private attributes: Record<string, string> = {};
+
 	private internalSecrets: Record<string, unknown> = {};
+
 	constructor(internals: Record<string, unknown>) {
 		this.attributes = {};
 		this.internalSecrets = { ...internals };
@@ -13,11 +16,16 @@ class VaultBuilder {
 	}
 
 	internal(key: string) {
-		if (_.has(this.internalSecrets, key)) return this.internalSecrets[key];
+		if (_.has(this.internalSecrets, key)) {
+			return this.internalSecrets[key];
+		}
 		return "";
 	}
+
 	gen(key: string, length = 128) {
-		if (_.has(this.internalSecrets, key)) return this.internalSecrets[key];
+		if (_.has(this.internalSecrets, key)) {
+			return this.internalSecrets[key];
+		}
 		if (!_.has(this.attributes, key)) {
 			_.set(this.attributes, key, VaultBuilder.random(length));
 		}

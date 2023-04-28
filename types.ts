@@ -1,7 +1,8 @@
 // typescript ontology for voca, used around the project
 
-import type { Context, GenericObject } from "moleculer";
 import type { Job } from "bullmq";
+import type { Context, GenericObject } from "moleculer";
+
 export type Thing = {};
 export type Action = Thing;
 export type ServiceHandlerFun<T extends Action> = (
@@ -12,7 +13,7 @@ type KeysOfType<T, U> = { [K in keyof T]: K }[keyof T];
 export type ServiceDefinition<T extends Record<string, Action>> = Thing & {
 	name: string;
 	mixins?: unknown[];
-	settings?: unknown;
+	settings?: any;
 	adapter?: unknown;
 	actions: {
 		[K in keyof T]: {
@@ -62,11 +63,13 @@ export type ParkAction = Action & {
 	template: string;
 };
 
-export type InspectAction = Action & {};
-export type SetLabelsAction = Action & {
-	envName: string
-	labels: Record<string, string>
-}
+export type EnvironmentStatus = Action & {};
+export type GetLabelsAction = Action & {
+	envName: string;
+};
+export type SetLabelsAction = GetLabelsAction & {
+	labels: Record<string, string>;
+};
 export type VaultGetAction = Action & {
 	bucket: string;
 	key: string;
@@ -74,6 +77,10 @@ export type VaultGetAction = Action & {
 export type VaultSetAction = VaultGetAction & {
 	secrets: Record<string, string>;
 };
+export type RoutingAction = Action & {
+	token: string;
+};
+export type RoutingTokenAction = Action & {};
 
 export type Credential = Thing & {
 	jwt: string;

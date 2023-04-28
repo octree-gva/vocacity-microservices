@@ -1,7 +1,12 @@
-import { login, curryRead } from "./cli";
-import curryWrite from "./cli/curryWrite";
+import type { Read, Write } from "./cli";
+import { curryRead, curryWrite, login } from "./cli";
 
-const getVault = async () => {
+type GetVault = () => Promise<{
+	read: Read;
+	write: Write;
+}>;
+
+const getVault: GetVault = async () => {
 	const mountPath = `${process.env.VAULT_PATH}`;
 	let token;
 	try {
@@ -11,11 +16,6 @@ const getVault = async () => {
 			mountPath,
 		);
 	} catch (e) {
-		console.error({
-			user: process.env.VAULT_USER,
-			password: process.env.VAULT_PASSWORD,
-			mountPath,
-		});
 		throw new Error("errors.vault.login_error");
 	}
 	return {

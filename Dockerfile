@@ -14,7 +14,8 @@ RUN npm run build
 
 # -------------------
 FROM node:16-alpine
-
+ENV ROOT="/app" \
+  HOME="/app"
 WORKDIR /app
 
 # Copy source

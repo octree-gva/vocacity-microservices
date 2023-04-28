@@ -1,5 +1,5 @@
-import request from "../request";
 import { GLOBAL_APPID, SESSION } from "../constants";
+import request from "../request";
 
 export type InstallRequest = {
 	jps: string;
@@ -49,7 +49,7 @@ const install: InstallFn = async ({
 		envName,
 		jps,
 		displayName,
-		envGroups: process.env.JELASTIC_ROOT_ENVGROUP + "/" + envGroups,
+		envGroups: `${process.env.JELASTIC_ROOT_ENVGROUP}/${envGroups}`,
 		settings,
 		skipNodeEmails,
 		region,

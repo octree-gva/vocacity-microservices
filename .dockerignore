@@ -5,3 +5,6 @@ node_modules
 test
 .vscode
 data
+.DS_Store
+contrib
+coverage

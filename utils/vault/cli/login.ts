@@ -1,4 +1,5 @@
-import request, { VaultResponse } from "./request";
+import type { VaultResponse } from "./request";
+import request from "./request";
 
 export type LoginFn = (username: string, password: string, mountPoint?: string) => Promise<string>;
 const login: LoginFn = async (username, password, mountPoint = `${process.env.VAULT_PATH}`) => {
@@ -8,7 +9,9 @@ const login: LoginFn = async (username, password, mountPoint = `${process.env.VA
 			password,
 		},
 	);
-	if (!data.auth?.client_token) throw new Error("403");
+	if (!data.auth?.client_token) {
+		throw new Error("403");
+	}
 	return data.auth?.client_token;
 };
 export default login;

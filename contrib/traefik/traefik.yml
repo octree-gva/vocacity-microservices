@@ -1,0 +1,33 @@
+api:
+  dashboard: true
+
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+
+providers:
+  http:
+    endpoint: http://host.docker.internal:3000/services/dns?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkbnMuc2VydmljZSIsImF1ZCI6ImRucy5zZXJ2aWNlcyIsImlzcyI6ImRucyIsImlhdCI6MTY4MDY1MjIyMCwiZXhwIjoxNzEyMjA5MTYwfQ.lnk_WkHjW4Idi_kJk4sLTZDb8xXlpekrUNWLHf-oVCM
+    pollInterval: "30s"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "sysadmin@voca.city"
+      storage: "/etc/traefik/acme/acme.json"
+      httpChallenge:
+        entryPoint: "http"
+http:
+  redirections:
+    entryPoint:
+      to: https
+      scheme: https
+      permanent: true
+  middlewares:
+    hsts:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true

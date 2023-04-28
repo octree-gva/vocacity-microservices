@@ -7,6 +7,14 @@ services:
       - 6379:6379
     networks:
       - default
+  traefik:
+    image: traefik:v2.9.9
+    ports:
+      - 8080:8080
+    volumes:
+      - ./contrib/traefik:/etc/traefik
+    networks:
+      - default
 
   nats:
     image: nats:2.8

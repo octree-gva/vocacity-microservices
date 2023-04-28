@@ -1,12 +1,14 @@
 import { existsSync, readFileSync } from "fs";
-import internalSecrets from "./internalSecrets";
-import VaultBuilder from "./VaultBuilder";
 import path from "path";
 import _ from "lodash";
+import internalSecrets from "./internalSecrets";
+import VaultBuilder from "./VaultBuilder";
 
 const compileChart = async (templatePath: string, settings = {}) => {
 	const relativeTemplatePath = path.join(`./infra/charts/`, `${templatePath}.tpl`);
-	if (!existsSync(relativeTemplatePath)) throw new Error(`Template not found`);
+	if (!existsSync(relativeTemplatePath)) {
+		throw new Error(`Template not found`);
+	}
 	const chartString = readFileSync(relativeTemplatePath).toString();
 	const secrets = await internalSecrets();
 	const vault = new VaultBuilder(secrets || {});

@@ -1,6 +1,6 @@
-import { ServiceDefinition, VaultGetAction, VaultSetAction } from "../types";
-import { create400, create404, createSuccess } from "../utils/createResponse";
 import _ from "lodash";
+import type { ServiceDefinition, VaultGetAction, VaultSetAction } from "../types";
+import { create400, create404, createSuccess } from "../utils/createResponse";
 import vault from "../utils/vault";
 
 const VaultService: ServiceDefinition<{
@@ -20,7 +20,9 @@ const VaultService: ServiceDefinition<{
 				const { data, metadata } = await v.read(
 					`voca/users/${ctx.params.bucket}/${ctx.params.key}`,
 				);
-				if (!!metadata?.destroyed) throw create404();
+				if (metadata?.destroyed) {
+					throw create404();
+				}
 				return createSuccess(data);
 			},
 		},

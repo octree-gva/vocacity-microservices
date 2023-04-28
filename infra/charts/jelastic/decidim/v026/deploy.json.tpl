@@ -33,7 +33,7 @@
                 "SECRET_KEY_BASE": "${globals.SECRET_KEY_BASE}",
                 "MASTER_KEY": "${globals.MASTER_KEY}",
                 "RAILS_CACHE_MODE": "memcached",
-                "MEMCACHED_SERVERS": "",
+                "MEMCACHED_SERVERS": "memcached:11211",
                 "RAILS_JOB_MODE": "sidekiq",
                 "JOB_REDIS_URL": "redis://default:${globals.REDIS_PASSWORD}@redis:6379/1",
                 "DECIDIM_RUN_NGINX": "1",
@@ -47,7 +47,7 @@
             },
             "links": [
                 "sqldb:psql",
-                "cache:cache",
+                "cache:memcached",
                 "nosqldb:redis"
             ],
             "image": "${globals.DECIDIM_IMAGE}",

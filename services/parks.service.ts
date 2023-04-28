@@ -1,11 +1,11 @@
-import { ServiceDefinition, ParkAction, VaultSetAction } from "../types";
-import { create400, createSuccess } from "../utils/createResponse";
 import type { Job } from "bullmq";
-import BullMqMixin from "moleculer-bullmq";
 import _ from "lodash";
+import BullMqMixin from "moleculer-bullmq";
+import type { ParkAction, ServiceDefinition, VaultSetAction } from "../types";
+import { create400, createSuccess } from "../utils/createResponse";
+import { compileChart, random } from "../utils/deployments";
 import jelastic from "../utils/jelastic";
 import serializeJob from "../utils/serializeJob";
-import { compileChart, random } from "../utils/deployments";
 
 /**
  * Park instances from an infrastructure chart.
@@ -35,7 +35,9 @@ const ParkService: ServiceDefinition<{
 				template: "string",
 			},
 			async handler(ctx) {
-				if (!this.localQueue || this.queue === true) throw new Error("internal error");
+				if (!this.localQueue || this.queue === true) {
+					throw new Error("internal error");
+				}
 				ctx.meta.serviceName = `${ctx.service?.name}`;
 				const job = await this.localQueue(
 					ctx,
@@ -53,7 +55,7 @@ const ParkService: ServiceDefinition<{
 			},
 			async handler(ctx) {
 				let chart;
-				let updateProgress =
+				const updateProgress =
 					(ctx.locals.job as Job)?.updateProgress.bind(ctx.locals.job) ||
 					(async (n) => Promise.resolve(n));
 				try {
@@ -86,7 +88,7 @@ const ParkService: ServiceDefinition<{
 					await jelastic.install({
 						jps: chart.compiled,
 						displayName: "parked instance",
-						envName: envName,
+						envName,
 						envGroups: "parked",
 						skipNodeEmails: true,
 						region: "",

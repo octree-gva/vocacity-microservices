@@ -1,28 +1,28 @@
 import type { QueryFilters } from "moleculer-db";
-import {
-	UserRegistrationAction,
-	VocaError,
-	User,
-	UserPermission,
-	UserLoginAction,
-	ServiceResponse,
-	ServiceDefinition,
+import type {
 	Action,
-	UserResetPasswordAction,
 	IntrospectAction,
-	VocaResponse,
 	Organization,
+	ServiceDefinition,
+	ServiceResponse,
+	User,
+	UserLoginAction,
+	UserPermission,
+	UserRegistrationAction,
+	UserResetPasswordAction,
+	VocaError,
+	VocaResponse,
 } from "../types";
 import {
 	create400,
-	createSuccess,
 	createGraphql400,
 	createGraphql404,
+	createSuccess,
 } from "../utils/createResponse";
 import { parse, sign } from "../utils/jwt";
 
 const serializePermissions = (perms: UserPermission[]) =>
-	perms.reduce(function (acc, next) {
+	perms.reduce((acc, next) => {
 		const { permissions: permCsv } = next;
 		return acc.concat(
 			permCsv
@@ -78,8 +78,10 @@ const UserPermissionsService: ServiceDefinition<{
 			},
 			async handler({ params }) {
 				const tk = parse(params.token);
-				if (tk.active) return createSuccess(tk);
-				else return create400();
+				if (tk.active) {
+					return createSuccess(tk);
+				}
+				return create400();
 			},
 		},
 		register: {
@@ -269,8 +271,9 @@ const UserPermissionsService: ServiceDefinition<{
 					id: parsedToken.sub,
 					password: params.newPassword,
 				});
-				if (changedPassword.code > 300)
+				if (changedPassword.code > 300) {
 					throw createGraphql400("user-permissions.errors.invalid_token");
+				}
 				return createSuccess({ ok: true });
 			},
 		},

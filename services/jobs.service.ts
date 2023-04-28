@@ -1,8 +1,9 @@
-import { ServiceDefinition, ParkAction, VaultSetAction } from "../types";
-import { create400, createSuccess } from "../utils/createResponse";
 import type { Job } from "bullmq";
-import BullMqMixin from "moleculer-bullmq";
 import _ from "lodash";
+import BullMqMixin from "moleculer-bullmq";
+import type { ServiceDefinition } from "../types";
+import { ParkAction, VaultSetAction } from "../types";
+import { create400, createSuccess } from "../utils/createResponse";
 import serializeJob from "../utils/serializeJob";
 
 /**

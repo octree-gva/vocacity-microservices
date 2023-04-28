@@ -1,10 +1,17 @@
+import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosError } from "axios";
 import _ from "lodash";
-import axios, { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from "axios";
 import { GLOBAL_APPID, SESSION } from "./constants";
 
-if (!process.env.JELASTIC_ENDPOINT) throw new Error("JELASTIC_ENDPOINT env is missing");
-if (!process.env.JELASTIC_TOKEN) throw new Error("JELASTIC_TOKEN env is missing");
-if (!process.env.JELASTIC_ROOT_ENVGROUP) throw new Error("JELASTIC_ROOT_ENVGROUP env is missing");
+if (!process.env.JELASTIC_ENDPOINT) {
+	throw new Error("JELASTIC_ENDPOINT env is missing");
+}
+if (!process.env.JELASTIC_TOKEN) {
+	throw new Error("JELASTIC_TOKEN env is missing");
+}
+if (!process.env.JELASTIC_ROOT_ENVGROUP) {
+	throw new Error("JELASTIC_ROOT_ENVGROUP env is missing");
+}
 
 const axiosInstance = axios.create({
 	baseURL: `${process.env.JELASTIC_ENDPOINT}/1.0`,
@@ -20,16 +27,19 @@ export const requestInterceptor = (config: InternalAxiosRequestConfig<any>) => {
 		_.set(config, "headers.Accept", "application/x-www-form-urlencoded");
 		_.set(config, "headers.Content-Type", "application/x-www-form-urlencoded");
 	}
-	return config as InternalAxiosRequestConfig<any>;
+	return config;
 };
 
 export const responseInterceptor = (response: AxiosResponse<any>) => {
 	const { status, data } = response;
 	if (status >= 200 && status <= 300) {
+		if (data.result === 11) {
+			throw new Error("errors.infra.not_found");
+		}
 		if (data.error) {
 			console.log("ERROR", {
-				dataKeys: Object.keys(data),
-				errorKeys: Object.keys(data.error || {}),
+				result: data.result,
+				errorKeys: JSON.stringify(data?.error || `Error status ${status}`),
 			});
 			throw Error(JSON.stringify(data?.error || `Error status ${status}`));
 		}

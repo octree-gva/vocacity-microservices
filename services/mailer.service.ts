@@ -1,4 +1,5 @@
 import mailer from "moleculer-mail";
+
 const BOOL_VALUES = ["true", "1", "enabled"];
 module.exports = {
 	name: "mailer",

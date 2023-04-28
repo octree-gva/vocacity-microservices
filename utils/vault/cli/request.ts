@@ -1,8 +1,15 @@
-import _ from "lodash";
-import axios, { AxiosResponse, AxiosError } from "axios";
-if (!process.env.VAULT_ADDR) throw new Error("VAULT_ADDR env is missing");
-if (!process.env.VAULT_USER) throw new Error("VAULT_USER env is missing");
-if (!process.env.VAULT_PASSWORD) throw new Error("VAULT_PASSWORD env is missing");
+import type { AxiosResponse } from "axios";
+import axios, { AxiosError } from "axios";
+
+if (!process.env.VAULT_ADDR) {
+	throw new Error("VAULT_ADDR env is missing");
+}
+if (!process.env.VAULT_USER) {
+	throw new Error("VAULT_USER env is missing");
+}
+if (!process.env.VAULT_PASSWORD) {
+	throw new Error("VAULT_PASSWORD env is missing");
+}
 
 export type VaultResponse = {
 	error?: string;
@@ -36,12 +43,8 @@ const responseInterceptor = (response: AxiosResponse<any>) => {
 	);
 };
 
-axiosInstance.interceptors.request.use(undefined, function (error: any) {
-	return Promise.reject(error);
-});
+axiosInstance.interceptors.request.use(undefined, (error: any) => Promise.reject(error));
 
-axiosInstance.interceptors.response.use(responseInterceptor, function (error: any) {
-	return Promise.reject(error);
-});
+axiosInstance.interceptors.response.use(responseInterceptor, (error: any) => Promise.reject(error));
 
 export default axiosInstance;
