@@ -1,0 +1,95 @@
+mutation CreateInstance($data: InstanceInput!) {
+  createInstance(data: $data) {
+    data {
+      id
+      attributes {
+        title
+        subdomain
+        envName
+        instanceUUID
+        status
+        default_locale
+        available_locales
+        currency
+        account {
+          data {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation updateInstance($instanceUpdate: InstanceInput!, $id: ID!) {
+  updateInstance(id: $id, data: $instanceUpdate) {
+    data {
+      id
+      attributes {
+        instanceUUID
+      }
+    }
+  }
+}
+
+query Instances {
+  instances {
+    data {
+      id
+      attributes {
+        title
+        subdomain
+        envName
+        instanceUUID
+        status
+        default_locale
+        available_locales
+        currency
+        account {
+          data {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+
+query Instance($id: ID!) {
+  instance(id: $id) {
+    data {
+      id
+      attributes {
+        title
+        subdomain
+        envName
+        instanceUUID
+        status
+        default_locale
+        available_locales
+        customDomain
+        currency
+        account {
+          data {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+
+
+query InstanceCustomDomainLookup($id: ID!) {
+  instance(id: $id) {
+    data {
+      id
+      attributes {
+        customDomainLookup {
+          ip
+          version
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,54 @@
+fragment ProfileFields on UsersPermissionsMe {
+  id
+  username
+  email
+  lastName
+  firstName
+}
+
+query profile {
+  me {
+        ...ProfileFields
+  }
+}
+
+mutation updateUser($userUpdate: UsersPermissionsUserInput!, $id: ID!) {
+  updateUsersPermissionsUser(
+    id: $id
+    data: $userUpdate
+  ) {
+    data {
+      attributes {
+        username
+        email
+        lastName
+        firstName
+      }
+    }
+  }
+}
+
+mutation RegisterUser($email: String!, $password: String!) {
+  register(input: { username: $email, email: $email, password: $password }) {
+    jwt
+    user {
+      id
+      firstName
+      lastName
+      email
+      confirmed
+      blocked
+      role {
+        id
+        name
+        description
+      }
+      administratorAccounts {
+        id
+        attributes {
+          title
+        }
+      }
+    }
+  }
+}
