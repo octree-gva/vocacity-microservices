@@ -12,7 +12,7 @@ import serializeJob from "../utils/serializeJob";
  */
 const JobsService: ServiceDefinition<{
 	status: { name: string; id: Job["id"] };
-}> = {
+}, [typeof BullMqMixin]> = {
 	name: "jobs",
 	settings: {
 		bullmq: {
@@ -24,7 +24,7 @@ const JobsService: ServiceDefinition<{
 	actions: {
 		status: {
 			async handler(ctx) {
-				const job = await (this as any).job(ctx.params.name, ctx.params.id);
+				const job = await this.job(ctx.params.name, ctx.params.id);
 				return createSuccess(await serializeJob(job));
 			},
 		},

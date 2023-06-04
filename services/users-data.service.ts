@@ -16,7 +16,7 @@ const UserDataService: ServiceDefinition<{
 	register: { email: string; password: string };
 	login: { email: string; password: string };
 	resetPassword: { id: string; password: string };
-}> = {
+}, [typeof DbService, typeof AuthorizeMixin]> = {
 	name: "users-data",
 	mixins: [DbService, AuthorizeMixin],
 	adapter: new SqlAdapter(process.env.DATABASE_URL || "sqlite::memory"),

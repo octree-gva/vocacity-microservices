@@ -7,7 +7,7 @@ import vault from "../utils/vault";
 const VaultService: ServiceDefinition<{
 	set: VaultSetAction;
 	get: VaultGetAction;
-}> = {
+}, [typeof AuthMixin]> = {
 	name: "vault",
 	settings: {},
 	mixins: [AuthMixin],

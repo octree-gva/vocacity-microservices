@@ -41,7 +41,7 @@ const UserPermissionsService: ServiceDefinition<{
 	sendResetPassword: Omit<UserLoginAction, "password">;
 	resetPassword: UserResetPasswordAction;
 	introspect: IntrospectAction;
-}> = {
+}, [typeof AuthorizationMixin]> = {
 	name: "user-permissions",
 	mixins: [AuthorizationMixin],
 	settings: {

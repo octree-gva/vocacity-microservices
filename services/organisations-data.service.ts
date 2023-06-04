@@ -32,7 +32,7 @@ const toSlug = (str: string | number) => {
 };
 const OrganizationsDataService: ServiceDefinition<{
 	create: { name: string };
-}> = {
+}, [typeof DbService]> = {
 	name: "organisations-data",
 	mixins: [DbService],
 	adapter: new SqlAdapter(process.env.DATABASE_URL || "sqlite::memory"),
@@ -42,7 +42,7 @@ const OrganizationsDataService: ServiceDefinition<{
 				name: { type: "string", min: 2 },
 			},
 			async handler(ctx) {
-				const adapter = (this as any).adapter as SequelizeDbAdapter;
+				const adapter = this.adapter as SequelizeDbAdapter;
 				let slug = toSlug(uuid());
 				// not 100% uniq, but good enough for now.
 				while (true) {

@@ -17,6 +17,30 @@ export type ActionResponse = Thing | void;
 export type ServiceHandlerFun<T extends Action> = (
 	ctx: Context<T, ContextMeta, ContextLocals>,
 ) => Promise<VocaResponse>;
+type DeepMerge<T extends object, U extends object> =
+  U extends any[]
+    ? T
+    : U extends object
+    ? T & {
+        [K in keyof U]: K extends keyof T
+          ? DeepMerge<T[K] extends object ? T[K] : {}, U[K] extends object ? U[K] : {}>
+          : U[K];
+      }
+    : T;
+
+type ExtractMethods<T> = T extends { methods: infer M } ? M : {};
+type ExtractAttributes<T> = Exclude<T, { methods: any }>;
+
+type MergeDeep<T extends object[]> = T extends []
+  ? {}
+  : {
+      [K in keyof T]: T[K] extends infer Item
+        ? DeepMerge<ExtractMethods<Item> & object, ExtractAttributes<Item> & object>
+        : never;
+    }[number];
+
+
+
 export type MixinFun<T extends Action, K extends ActionResponse> = (
 	ctx: Context<T, ContextMeta, ContextLocals>,
 	action?: any,
@@ -32,34 +56,27 @@ export type ContextLocals = GenericObject & {
 	token?: ParsedJWT;
 	roles?: string[];
 };
-type MixinDefinition = Thing & ServiceSchema;
-type MergeMixinMethods<M extends MixinDefinition[]> = M extends [infer F, ...infer R]
-	? F extends MixinDefinition
-		? R extends MixinDefinition[]
-			? MergeMixinMethods<R>
-			: never
-		: {}
-	: {};
-export interface ServiceDefinition<T extends Record<string, Action>> extends ServiceSchema {
-		mixins: MixinDefinition[];
+type MixinDefinition = Thing & Partial<ServiceSchema>;
+export interface ServiceDefinition<ServiceActions extends Record<string, Action>, ServiceMixins extends MixinDefinition[]> extends ServiceSchema {
+		mixins?: ServiceMixins;
 		actions: {
-			[K in keyof T]: ActionSchema & {
-				params?: Record<keyof T[K], ActionParamTypes>;
-				handler: ServiceHandlerFun<T[K]> & ThisType<MergeMixinMethods<this['mixins']>>;
+			[K in keyof ServiceActions]: ActionSchema & {
+				params?: Record<keyof ServiceActions[K], ActionParamTypes>;
+				handler: ThisType<MergeDeep<ServiceMixins>> & ServiceHandlerFun<ServiceActions[K]>;
 				queue?:
 					| true
-					| (<S extends KeysOfType<T, "string">>(
-							ctx: Context<T[K], ContextMeta, ContextLocals>,
+					| (<S extends KeysOfType<ServiceActions, "string">>(
+							ctx: Context<ServiceActions[K], ContextMeta, ContextLocals>,
 							queue: string,
 							event: S,
-							payload: T[S],
+							payload: ServiceActions[S],
 							options: { priority: number },
 					  ) => Promise<Job>);
 				graphql?: unknown;
-				localQueue?: <S extends KeysOfType<T, "string">>(
-					ctx: Context<T[K], ContextMeta, ContextLocals>,
+				localQueue?: <S extends KeysOfType<ServiceActions, "string">>(
+					ctx: Context<ServiceActions[K], ContextMeta, ContextLocals>,
 					event: S,
-					payload: T[S],
+					payload: ServiceActions[S],
 					options: { priority: number },
 				) => Promise<Job>;
 				logger?: LoggerInstance;

@@ -17,9 +17,10 @@ import jelastic from "../utils/jelastic";
 const EnvInspectService: ServiceDefinition<{
 	summary: EnvironmentStatus;
 	details: EnvironmentStatus;
-}> = {
+}, []> = {
 	name: "env-inspect",
 	settings: {},
+	mixins:[],
 	actions: {
 		details: {
 			params: {},

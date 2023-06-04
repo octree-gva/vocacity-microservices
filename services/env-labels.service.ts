@@ -17,8 +17,9 @@ import jelastic from "../utils/jelastic";
 const EnvironmentService: ServiceDefinition<{
 	get: GetLabelsAction;
 	set: SetLabelsAction;
-}> = {
+}, []> = {
 	name: "env-labels",
+	mixins: [],
 	settings: {},
 	actions: {
 		get: {
