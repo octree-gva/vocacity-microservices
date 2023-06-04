@@ -22,7 +22,7 @@ const ParkService: ServiceDefinition<{
 	park: ParkAction;
 	_park: ParkAction;
 }, [typeof BullMqMixin]> = {
-	name: "parks",
+	name: "decidim-park",
 	settings: {
 		bullmq: {
 			client: process.env.BULL_REDIS_URL,
