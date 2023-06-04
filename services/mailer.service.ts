@@ -1,6 +1,9 @@
 import mailer from "moleculer-mail";
 
 const BOOL_VALUES = ["true", "1", "enabled"];
+/**
+ * Send emails with a template present in /email-templates
+ */
 module.exports = {
 	name: "mailer",
 	mixins: [mailer],

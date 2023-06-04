@@ -2,6 +2,7 @@ import type { QueryFilters } from "moleculer-db";
 import type {
 	Action,
 	IntrospectAction,
+	IntrospectBearerAction,
 	Organization,
 	ServiceDefinition,
 	ServiceResponse,
@@ -20,6 +21,7 @@ import {
 	createSuccess,
 } from "../utils/createResponse";
 import { parse, sign } from "../utils/jwt";
+import AuthorizationMixin, { AuthMixin } from "../mixins/authorize.mixin";
 
 const serializePermissions = (perms: UserPermission[]) =>
 	perms.reduce((acc, next) => {
@@ -41,6 +43,7 @@ const UserPermissionsService: ServiceDefinition<{
 	introspect: IntrospectAction;
 }> = {
 	name: "user-permissions",
+	mixins: [AuthorizationMixin],
 	settings: {
 		graphql: {
 			type: `
@@ -100,13 +103,20 @@ const UserPermissionsService: ServiceDefinition<{
 			},
 			handler: async (ctx) => {
 				const { params } = ctx;
+				const authMethods = this as unknown as AuthMixin["methods"];
+				const { token: serviceToken } = await authMethods.serviceToken(ctx);
 				if (params.password !== params.passwordConfirmation) {
 					throw createGraphql400("user_permissions.errors.passwords_dont_match");
 				}
-				const user: ServiceResponse<User> = await ctx.call("users-data.register", {
-					email: params.email,
-					password: `${params.password}`,
-				});
+
+				const user: ServiceResponse<User> = await ctx.call(
+					"users-data.register",
+					{
+						email: params.email,
+						password: `${params.password}`,
+					},
+					{ meta: { bearer: serviceToken } },
+				);
 				if (user.code > 300) {
 					const error = user as unknown as VocaError;
 					if (error.message === "unique_violation") {
@@ -179,11 +189,18 @@ const UserPermissionsService: ServiceDefinition<{
                 `,
 			},
 			async handler(ctx) {
+				const authMethods = this as unknown as AuthMixin["methods"];
+				const { token: serviceToken } = await authMethods.serviceToken(ctx);
+
 				const { params } = ctx;
-				const auth: User | undefined = await ctx.call("users-data.login", {
-					email: params.email,
-					password: params.password,
-				});
+				const auth: User | undefined = await ctx.call(
+					"users-data.login",
+					{
+						email: params.email,
+						password: params.password,
+					},
+					{ meta: { bearer: serviceToken } },
+				);
 				if (!auth || !auth.id) {
 					throw createGraphql404();
 				}
@@ -195,8 +212,6 @@ const UserPermissionsService: ServiceDefinition<{
 						},
 					},
 				);
-				console.log({ id: auth.id, permissions });
-
 				// Get the permission
 				const jws = sign(
 					auth.id,
@@ -223,11 +238,18 @@ const UserPermissionsService: ServiceDefinition<{
 			},
 			async handler(ctx) {
 				const { params } = ctx;
-				const matches: User[] = await ctx.call("users-data.find", {
-					query: {
-						email: params.email,
+				const authMethods = this as unknown as AuthMixin["methods"];
+				const { token: serviceToken } = await authMethods.serviceToken(ctx);
+
+				const matches: User[] = await ctx.call(
+					"users-data.find",
+					{
+						query: {
+							email: params.email,
+						},
 					},
-				});
+					{ meta: { bearer: serviceToken } },
+				);
 				const [user] = matches;
 				if (!user || !user.id) {
 					return createSuccess({ ok: true });
@@ -260,6 +282,9 @@ const UserPermissionsService: ServiceDefinition<{
 			},
 			async handler(ctx) {
 				const { params } = ctx;
+				const authMethods = this as unknown as AuthMixin["methods"];
+				const { token: serviceToken } = await authMethods.serviceToken(ctx);
+
 				const parsedToken = parse(params.token);
 				if (!parsedToken.active) {
 					throw createGraphql400("user-permissions.errors.invalid_token");
@@ -267,10 +292,14 @@ const UserPermissionsService: ServiceDefinition<{
 				if (!parsedToken.aud.includes("reset_password")) {
 					throw createGraphql400("user-permissions.errors.invalid_token");
 				}
-				const changedPassword: VocaResponse = await ctx.call("users-data.resetPassword", {
-					id: parsedToken.sub,
-					password: params.newPassword,
-				});
+				const changedPassword: VocaResponse = await ctx.call(
+					"users-data.resetPassword",
+					{
+						id: parsedToken.sub,
+						password: params.newPassword,
+					},
+					{ meta: { bearer: serviceToken } },
+				);
 				if (changedPassword.code > 300) {
 					throw createGraphql400("user-permissions.errors.invalid_token");
 				}

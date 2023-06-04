@@ -1,7 +1,5 @@
 import _ from "lodash";
-import BullMqMixin from "moleculer-bullmq";
 import type { EnvironmentStatus, ServiceDefinition } from "../types";
-import { GetLabelsAction, SetLabelsAction } from "../types";
 import { create400, createSuccess } from "../utils/createResponse";
 import jelastic from "../utils/jelastic";
 

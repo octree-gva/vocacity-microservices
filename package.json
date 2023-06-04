@@ -4,7 +4,7 @@
   "description": "My Moleculer-based microservices project",
   "scripts": {
     "build": "rm -rf dist && CI=true tsc --project tsconfig.build.json",
-    "dev": "ts-node --files ./node_modules/moleculer/bin/moleculer-runner.js --config moleculer.config.ts --hot --repl services/**/*.service.ts",
+    "dev": "ts-node --files ./node_modules/moleculer/bin/moleculer-runner.js --config moleculer.config.ts --hot --repl services/**/*.service.ts --envfile .env",
     "start": "moleculer-runner --config dist/moleculer.config.js",
     "test:types": "concurrently npm:prettier npm:lint npm:typecheck",
     "typecheck": "tsc --noEmit && echo \"tsc: no typecheck errors\"",
@@ -65,6 +65,7 @@
     "helmet": "^6.0.1",
     "jaeger-client": "^3.19.0",
     "jsonwebtoken": "^9.0.0",
+    "kleur": "^4.1.5",
     "lodash": "^4.17.21",
     "moleculer": "^0.14.27",
     "moleculer-apollo-server": "^0.3.8",
@@ -80,6 +81,7 @@
     "react": "^17.0.0",
     "sequelize": "^6.29.3",
     "subscriptions-transport-ws": "^0.9.0",
+    "table": "^6.8.1",
     "uuid": "^9.0.0"
   },
   "engines": {

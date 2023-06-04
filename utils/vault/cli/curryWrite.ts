@@ -1,7 +1,10 @@
 import type { VaultResponse } from "./request";
 import request from "./request";
 
-export type Write = (path: string, data: Record<string, string>) => Promise<NonNullable<VaultResponse["data"]>>;
+export type Write = (
+	path: string,
+	data: Record<string, string>,
+) => Promise<NonNullable<VaultResponse["data"]>>;
 export type CurryWrite = (token: string, mountPath?: string) => Write;
 
 const curryWrite: CurryWrite =
@@ -16,7 +19,7 @@ const curryWrite: CurryWrite =
 				},
 			},
 		);
-		if (!!secrets.data) {
+		if (secrets.data) {
 			return secrets.data;
 		}
 		return {};

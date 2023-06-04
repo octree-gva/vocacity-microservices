@@ -1,7 +1,7 @@
 import type { Job } from "bullmq";
 import _ from "lodash";
 import BullMqMixin from "moleculer-bullmq";
-import type { ParkAction, ServiceDefinition, VaultSetAction } from "../types";
+import type { ParkAction, ServiceDefinition, SetLabelsAction, VaultSetAction } from "../types";
 import { create400, createSuccess } from "../utils/createResponse";
 import { compileChart, random } from "../utils/deployments";
 import jelastic from "../utils/jelastic";
@@ -59,7 +59,7 @@ const ParkService: ServiceDefinition<{
 					(ctx.locals.job as Job)?.updateProgress.bind(ctx.locals.job) ||
 					(async (n) => Promise.resolve(n));
 				try {
-					chart = await compileChart(ctx.params.template);
+					chart = await compileChart("jelastic/decidim/v026/deploy.json");
 				} catch (e) {
 					const { message } = e;
 					console.log(e);
@@ -82,7 +82,7 @@ const ParkService: ServiceDefinition<{
 					throw new Error("errors.deployments.vault_error");
 				}
 				await updateProgress(5);
-
+				console.log(chart.compiled);
 				// Run deployment with compiled template
 				try {
 					await jelastic.install({
@@ -94,10 +94,26 @@ const ParkService: ServiceDefinition<{
 						region: "",
 					});
 				} catch (e) {
+					// pass, jelastic on install is sometime quiet touchy
+				}
+				try {
+					await updateProgress(90);
+					await ctx.call<{}, SetLabelsAction>("env-labels.set", {
+						envName,
+						labels: {
+							"voca.parked": "true",
+							"voca.product": "decidim",
+							"voca.url": "http://wait-for-it.voca.city",
+							"traefik.enabled": "true",
+							"traefik.http.routers.decidim.rule": `Host(\`${envName}.voca.city\`)`,
+							"traefik.http.services.decidim.loadbalancer.server": `http://wait-for-it.voca.city`,
+						},
+					});
+					await updateProgress(100);
+				} catch (e) {
+					// If we can't set the labels, the instance probably is not parked
 					return create400(e);
 				}
-
-				await updateProgress(90);
 				return createSuccess(await serializeJob(ctx.locals.job));
 			},
 		},

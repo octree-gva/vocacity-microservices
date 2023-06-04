@@ -5,9 +5,10 @@ import SqlAdapter from "moleculer-db-adapter-sequelize";
 import Sequelize from "sequelize";
 import type { ServiceDefinition, User } from "../types";
 import { create400, create404, createSuccess } from "../utils/createResponse";
+import AuthorizeMixin, { AuthMixin } from "../mixins/authorize.mixin";
 
 const SALT_ROUND = 12;
-
+const ALLOWED_CALLERS = ["user-permissions"];
 if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
 	throw new Error("Error: env DATABASE_URL is not defined.");
 }
@@ -17,7 +18,7 @@ const UserDataService: ServiceDefinition<{
 	resetPassword: { id: string; password: string };
 }> = {
 	name: "users-data",
-	mixins: [DbService],
+	mixins: [DbService, AuthorizeMixin],
 	adapter: new SqlAdapter(process.env.DATABASE_URL || "sqlite::memory"),
 	actions: {
 		login: {
@@ -26,6 +27,9 @@ const UserDataService: ServiceDefinition<{
 				password: { type: "string", min: 4 },
 			},
 			async handler(ctx) {
+				const authMethods = this as unknown as AuthMixin["methods"];
+				await authMethods.authorizeService(ctx, ALLOWED_CALLERS);
+
 				const adapter = (this as any).adapter as SequelizeDbAdapter;
 				const match = (await adapter.findOne({
 					where: { email: `${ctx.params.email}` },
@@ -49,6 +53,9 @@ const UserDataService: ServiceDefinition<{
 				password: { type: "string", min: 4 },
 			},
 			async handler(ctx) {
+				const authMethods = this as unknown as AuthMixin["methods"];
+				await authMethods.authorizeService(ctx, ALLOWED_CALLERS);
+
 				const adapter = (this as any).adapter as SequelizeDbAdapter;
 				const match = (await adapter.findOne({
 					where: { id: `${ctx.params.id}` },
@@ -68,6 +75,9 @@ const UserDataService: ServiceDefinition<{
 				password: { type: "string", min: 4 },
 			},
 			async handler(ctx) {
+				const authMethods = this as unknown as AuthMixin["methods"];
+				await authMethods.authorizeService(ctx, ALLOWED_CALLERS);
+
 				const adapter = (this as any).adapter as SequelizeDbAdapter;
 				const salt = await bcrypt.genSalt(SALT_ROUND);
 				const hashed = await bcrypt.hash(ctx.params.password, salt);

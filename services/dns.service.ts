@@ -1,14 +1,9 @@
-import type { Job } from "bullmq";
-import _ from "lodash";
-import BullMqMixin from "moleculer-bullmq";
+import axios from "axios";
+import _, { property } from "lodash";
 import type { RoutingAction, RoutingTokenAction, ServiceDefinition } from "../types";
-import { VaultSetAction } from "../types";
 import { create400, createSuccess } from "../utils/createResponse";
-import { compileChart, random } from "../utils/deployments";
-import jelastic from "../utils/jelastic";
 import type { EnvironmentsDetails } from "../utils/jelastic/environment/environmentsDetails";
 import { parse, sign } from "../utils/jwt";
-import serializeJob from "../utils/serializeJob";
 
 /**
  * Park instances from an infrastructure chart.
@@ -26,7 +21,6 @@ const DNSService: ServiceDefinition<{
 	newToken: RoutingTokenAction;
 }> = {
 	name: "dns",
-
 	actions: {
 		/**
 		 * Generate a new token for traefik with a validity of one year.
@@ -58,16 +52,62 @@ const DNSService: ServiceDefinition<{
 				const { data: environments } = await ctx.call<{ data: EnvironmentsDetails[] }>(
 					"env-inspect.details",
 				);
+
 				const traefikConfig = environments.reduce((acc, env) => {
-					const { properties: props } = env;
-					return Object.keys(props).reduce((acc, curr) => {
-						_.set(acc, curr, props[curr]);
-						return acc;
-					}, {} as any);
+					return _.merge(acc, jelasticToTraefik(env));
 				}, {} as any);
-				return createSuccess({ config: traefikConfig.traefik });
+
+				console.log("update config", { traefikConfig });
+
+				return createSuccess({ config: traefikConfig });
 			},
 		},
 	},
 };
 export default DNSService;
+
+/**
+ * Convert a jelastic environment introspection to a traefik configuration.
+ * We uses environment properties to be able to set properties like docker labels.
+ *
+ * Here a minimal config, to set through properties (see env-labels.service):
+ * traefik.enabled=true
+ * traefik.http.routers.redis.rule=Host(`yourdomain.com`)
+ * traefik.http.services.redis.loadbalancer.server.url=123.42.12.21
+ */
+const jelasticToTraefik = (env: EnvironmentsDetails) => {
+	const { properties } = env;
+	// Convert dotted notation in deepHash
+	const props = Object.keys(properties).reduce((acc, curr) => {
+		_.set(acc, curr, properties[curr]);
+		return acc;
+	}, {});
+	const envName = _.get(env, "envName");
+	if (!envName) {
+		console.error("internal error: introspection gives an empty envName");
+		return {};
+	}
+	if (!_.get(props, "traefik.enabled", false)) {
+		return {};
+	}
+	const routerOptions = _.get(props, "traefik.http.routers", {});
+	return Object.entries(routerOptions).reduce((acc, [currKey, routerConfig]) => {
+		const routerName = `router-${envName}-${currKey}`;
+		const serviceName = `service-${envName}-${currKey}`;
+		const serviceConfig = _.get(props, `traefik.http.services.${currKey}`, {});
+		const servers = [
+			_.get(props, `traefik.http.services.${currKey}.loadbalancer.server`, undefined),
+			..._.get(props, `traefik.http.services.${currKey}.loadbalancer.servers`, []),
+		].filter(Boolean);
+		return {
+			[`${routerName}`]: _.merge(routerConfig, {
+				service: serviceName,
+				priority: _.get(routerOptions, "priority", 10),
+				tls: _.get(routerOptions, "tls", { certResolver: "letsencrypt" }),
+			}),
+			[`${serviceName}`]: _.merge(serviceConfig, {
+				loadbalancer: { servers },
+			}),
+		};
+	}, {});
+};

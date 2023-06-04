@@ -1,5 +1,6 @@
 import type { BrokerOptions, MetricRegistry, ServiceBroker } from "moleculer";
 import { Errors } from "moleculer";
+import replCommands from "./repl";
 
 /**
  * Moleculer ServiceBroker configuration file
@@ -204,7 +205,7 @@ const brokerConfig: BrokerOptions = {
 	middlewares: [],
 
 	// Register custom REPL commands.
-	replCommands: null,
+	replCommands: replCommands || [],
 
 	// Called after broker created.
 	// created(broker: ServiceBroker): void {},

@@ -1,4 +1,5 @@
 import _ from "lodash";
+import AuthMixin from "../mixins/authorize.mixin";
 import type { ServiceDefinition, VaultGetAction, VaultSetAction } from "../types";
 import { create400, create404, createSuccess } from "../utils/createResponse";
 import vault from "../utils/vault";
@@ -9,6 +10,7 @@ const VaultService: ServiceDefinition<{
 }> = {
 	name: "vault",
 	settings: {},
+	mixins: [AuthMixin],
 	actions: {
 		get: {
 			params: {

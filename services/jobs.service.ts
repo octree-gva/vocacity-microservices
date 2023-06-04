@@ -7,14 +7,7 @@ import { create400, createSuccess } from "../utils/createResponse";
 import serializeJob from "../utils/serializeJob";
 
 /**
- * Park instances from an infrastructure chart.
- * This service is accountable to:
- * - ask vault to save secrets (vault.set)
- * - insert vault's secrets in the infrastructure chart
- * - deploy the chart
- * - dispatch when an environment is parked.
- *
- * A park is an instance that is linked to no Organisation (for now).
+ * Provides observability on jobs.
  *
  */
 const JobsService: ServiceDefinition<{

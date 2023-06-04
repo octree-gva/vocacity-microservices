@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { GLOBAL_APPID, SESSION } from "../constants";
 import request from "../request";
 

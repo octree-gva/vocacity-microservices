@@ -18,6 +18,8 @@ vault write identity/entity-alias name="voca" \
      canonical_id=$(cat entity_id.txt) \
      mount_accessor=$(cat accessor_test.txt) \
      custom_metadata=account="Voca Service"
+     
+vault kv put secret/voca/internals @/tmp/secrets/internal.json
 
 echo ""
 echo "Voca Service"

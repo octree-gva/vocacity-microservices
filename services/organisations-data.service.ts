@@ -61,7 +61,7 @@ const OrganizationsDataService: ServiceDefinition<{
 					id: slug,
 				})) as unknown as Organization;
 				if (!match) {
-					return create500(`organizationss-data.errors.not_found`);
+					return create500(`organizations-data.errors.not_found`);
 				}
 				return createSuccess({
 					id: match.id,
