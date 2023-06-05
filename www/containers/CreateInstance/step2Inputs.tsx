@@ -6,27 +6,27 @@ import FieldSet from './fieldSet';
 import Typography from '@mui/material/Typography';
 
 const CreateInstanceStep2Inputs: StepInputs = () => {
-  const {t} = useTranslation();
+	const {t} = useTranslation();
 
-  return (
-    <FieldSet>
-      <Typography
-        variant="h5"
-        color="textSecondary"
-      >{t`CreateInstance.heading`}</Typography>
-      <Typography
-        variant="h6"
-        pb={1.5}
-        color="textSecondary"
-      >{t`CreateInstance.about`}</Typography>
-      <Field
-        component={SubdomainField}
-        name="subdomain"
-        label={t`CreateInstance.subdomain`}
-        required
-      />
-    </FieldSet>
-  );
+	return (
+		<FieldSet>
+			<Typography
+				variant="h5"
+				color="textSecondary"
+			>{t`CreateInstance.heading`}</Typography>
+			<Typography
+				variant="h6"
+				pb={1.5}
+				color="textSecondary"
+			>{t`CreateInstance.about`}</Typography>
+			<Field
+				component={SubdomainField}
+				name="subdomain"
+				label={t`CreateInstance.subdomain`}
+				required
+			/>
+		</FieldSet>
+	);
 };
 
 export default CreateInstanceStep2Inputs;

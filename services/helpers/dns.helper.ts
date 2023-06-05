@@ -1,5 +1,5 @@
 import { EnvironmentsDetails } from "../../utils/jelastic/environment/environmentsDetails";
-import _ from 'lodash'
+import _ from "lodash";
 /**
  * Convert a jelastic environment introspection to a traefik configuration.
  * We uses environment properties to be able to set properties like docker labels.

@@ -6,35 +6,35 @@ import {SessionProvider} from 'next-auth/react';
 import {render, RenderOptions} from '@testing-library/react';
 
 export type TestWrapperProps = React.PropsWithChildren<{
-  session: Session | null;
+	session: Session | null;
 }>;
 const TestWrapper: FC<TestWrapperProps> = ({children, session}) => {
-  return (
-    <SessionProvider session={session}>
-      <ThemeProvider theme={theme}>{children}</ThemeProvider>
-    </SessionProvider>
-  );
+	return (
+		<SessionProvider session={session}>
+			<ThemeProvider theme={theme}>{children}</ThemeProvider>
+		</SessionProvider>
+	);
 };
 const UnAuthenticatedWrapper: FC = props => (
-  <TestWrapper {...props} session={null} />
+	<TestWrapper {...props} session={null} />
 );
 const AuthenticatedWrapper: FC = props => (
-  <TestWrapper
-    {...props}
-    session={{user: {username: 'john-doe'}, expires: `${+new Date() + 30000}`}}
-  />
+	<TestWrapper
+		{...props}
+		session={{user: {username: 'john-doe'}, expires: `${+new Date() + 30000}`}}
+	/>
 );
 
 const customRender = (
-  ui: ReactElement,
-  options?: {isPublic?: boolean} & Omit<RenderOptions, 'wrapper'>
+	ui: ReactElement,
+	options?: {isPublic?: boolean} & Omit<RenderOptions, 'wrapper'>
 ) =>
-  render(ui, {
-    wrapper: !!options?.isPublic
-      ? UnAuthenticatedWrapper
-      : AuthenticatedWrapper,
-    ...options,
-  });
+	render(ui, {
+		wrapper: !!options?.isPublic
+			? UnAuthenticatedWrapper
+			: AuthenticatedWrapper,
+		...options,
+	});
 
 export * from '@testing-library/react';
 // Override our render with the snapshot-friendly render.

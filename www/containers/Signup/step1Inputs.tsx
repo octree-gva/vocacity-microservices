@@ -6,37 +6,37 @@ import {TextField} from 'formik-mui';
 import {StepInputs} from '../StepsForm';
 
 const SignupStep1Inputs: StepInputs = () => {
-  const {t} = useTranslation(undefined);
+	const {t} = useTranslation(undefined);
 
-  return (
-    <FieldSet>
-      <Typography
-        variant="h5"
-        color="textSecondary"
-      >{t`register.account.heading`}</Typography>
-      <Typography
-        variant="h6"
-        pb={1.5}
-        color="textSecondary"
-      >{t`register.account.desc`}</Typography>
-      <Field
-        component={TextField}
-        name="email"
-        type="email"
-        label={t`register.account.email`}
-        required
-      />
-    </FieldSet>
-  );
+	return (
+		<FieldSet>
+			<Typography
+				variant="h5"
+				color="textSecondary"
+			>{t`register.account.heading`}</Typography>
+			<Typography
+				variant="h6"
+				pb={1.5}
+				color="textSecondary"
+			>{t`register.account.desc`}</Typography>
+			<Field
+				component={TextField}
+				name="email"
+				type="email"
+				label={t`register.account.email`}
+				required
+			/>
+		</FieldSet>
+	);
 };
 
 const FieldSet = styled('fieldset')(({theme}) => ({
-  padding: theme.spacing(1, 0),
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing(2),
-  margin: theme.spacing(1, 0),
-  border: 'none',
+	padding: theme.spacing(1, 0),
+	display: 'flex',
+	flexDirection: 'column',
+	gap: theme.spacing(2),
+	margin: theme.spacing(1, 0),
+	border: 'none',
 }));
 
 export default SignupStep1Inputs;

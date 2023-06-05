@@ -14,10 +14,13 @@ import jelastic from "../utils/jelastic";
  * A park is an instance that is linked to no Organisation (for now).
  *
  */
-const EnvironmentService: ServiceDefinition<{
-	get: GetLabelsAction;
-	set: SetLabelsAction;
-}, []> = {
+const EnvironmentService: ServiceDefinition<
+	{
+		get: GetLabelsAction;
+		set: SetLabelsAction;
+	},
+	[]
+> = {
 	name: "env-labels",
 	mixins: [],
 	settings: {},

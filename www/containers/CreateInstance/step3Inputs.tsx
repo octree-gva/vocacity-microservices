@@ -8,39 +8,39 @@ import {Option} from './types';
 import Typography from '@mui/material/Typography';
 
 interface MakeStepArgs {
-  localeOptions: Array<Option>;
+	localeOptions: Array<Option>;
 }
 
 const MakeStep3Input =
-  ({localeOptions}: MakeStepArgs): StepInputs =>
-  () => {
-    const {t} = useTranslation();
+	({localeOptions}: MakeStepArgs): StepInputs =>
+	() => {
+		const {t} = useTranslation();
 
-    return (
-      <FieldSet>
-        <Typography
-          variant="h5"
-          color="textSecondary"
-        >{t`CreateInstance.heading`}</Typography>
-        <Typography
-          variant="h6"
-          pb={1.5}
-          color="textSecondary"
-        >{t`CreateInstance.options`}</Typography>
-        <Field
-          component={Autocomplete}
-          renderInput={({...params}) => (
-            <MuiTextField
-              {...params}
-              label={t`CreateInstance.default_locale`}
-            />
-          )}
-          name="default_locale"
-          options={localeOptions}
-          required
-        />
-      </FieldSet>
-    );
-  };
+		return (
+			<FieldSet>
+				<Typography
+					variant="h5"
+					color="textSecondary"
+				>{t`CreateInstance.heading`}</Typography>
+				<Typography
+					variant="h6"
+					pb={1.5}
+					color="textSecondary"
+				>{t`CreateInstance.options`}</Typography>
+				<Field
+					component={Autocomplete}
+					renderInput={({...params}) => (
+						<MuiTextField
+							{...params}
+							label={t`CreateInstance.default_locale`}
+						/>
+					)}
+					name="default_locale"
+					options={localeOptions}
+					required
+				/>
+			</FieldSet>
+		);
+	};
 
 export default MakeStep3Input;

@@ -1,6 +1,6 @@
 // typescript ontology for voca, used around the project
 
-import type { Job } from "bullmq";
+import type { Job, JobState } from "bullmq";
 import type {
 	ActionParamTypes,
 	ActionSchema,
@@ -8,44 +8,43 @@ import type {
 	GenericObject,
 	LoggerInstance,
 	ServiceSchema,
-	ServiceSettingSchema,
 } from "moleculer";
 
 export type Thing = {};
-export type Action = Thing;
+export type Action = Thing & {
+	params: {};
+	returns: {};
+};
 export type ActionResponse = Thing | void;
-export type ServiceHandlerFun<T extends Action> = (
-	ctx: Context<T, ContextMeta, ContextLocals>,
-) => Promise<VocaResponse>;
-type DeepMerge<T extends object, U extends object> =
-  U extends any[]
-    ? T
-    : U extends object
-    ? T & {
-        [K in keyof U]: K extends keyof T
-          ? DeepMerge<T[K] extends object ? T[K] : {}, U[K] extends object ? U[K] : {}>
-          : U[K];
-      }
-    : T;
+export type ServiceHandlerFun<Param extends Thing, ReturnType extends Thing> = (
+	ctx: Context<Param, ContextMeta, ContextLocals>,
+) => Promise<VocaResponse<ReturnType> | VocaError>;
+type DeepMerge<T extends object, U extends object> = U extends any[]
+	? T
+	: U extends object
+	? T & {
+			[K in keyof U]: K extends keyof T
+				? DeepMerge<T[K] extends object ? T[K] : {}, U[K] extends object ? U[K] : {}>
+				: U[K];
+	  }
+	: T;
 
 type ExtractMethods<T> = T extends { methods: infer M } ? M : {};
 type ExtractAttributes<T> = Exclude<T, { methods: any }>;
 
 type MergeDeep<T extends object[]> = T extends []
-  ? {}
-  : {
-      [K in keyof T]: T[K] extends infer Item
-        ? DeepMerge<ExtractMethods<Item> & object, ExtractAttributes<Item> & object>
-        : never;
-    }[number];
+	? {}
+	: {
+			[K in keyof T]: T[K] extends infer Item
+				? DeepMerge<ExtractMethods<Item> & object, ExtractAttributes<Item> & object>
+				: never;
+	  }[number];
 
-
-
-export type MixinFun<T extends Action, K extends ActionResponse> = (
-	ctx: Context<T, ContextMeta, ContextLocals>,
+export type MixinFun<T extends Action> = (
+	ctx: Context<T["params"], ContextMeta, ContextLocals>,
 	action?: any,
 	req?: any,
-) => Promise<K>;
+) => Promise<T["returns"]>;
 
 type KeysOfType<T, U> = { [K in keyof T]: K }[keyof T];
 export type ContextMeta = GenericObject & {
@@ -57,48 +56,51 @@ export type ContextLocals = GenericObject & {
 	roles?: string[];
 };
 type MixinDefinition = Thing & Partial<ServiceSchema>;
-export interface ServiceDefinition<ServiceActions extends Record<string, Action>, ServiceMixins extends MixinDefinition[]> extends ServiceSchema {
-		mixins?: ServiceMixins;
-		actions: {
-			[K in keyof ServiceActions]: ActionSchema & {
-				params?: Record<keyof ServiceActions[K], ActionParamTypes>;
-				handler: ThisType<MergeDeep<ServiceMixins>> & ServiceHandlerFun<ServiceActions[K]>;
-				queue?:
-					| true
-					| (<S extends KeysOfType<ServiceActions, "string">>(
-							ctx: Context<ServiceActions[K], ContextMeta, ContextLocals>,
-							queue: string,
-							event: S,
-							payload: ServiceActions[S],
-							options: { priority: number },
-					  ) => Promise<Job>);
-				graphql?: unknown;
-				localQueue?: <S extends KeysOfType<ServiceActions, "string">>(
-					ctx: Context<ServiceActions[K], ContextMeta, ContextLocals>,
-					event: S,
-					payload: ServiceActions[S],
-					options: { priority: number },
-				) => Promise<Job>;
-				logger?: LoggerInstance;
-			};
+export interface ServiceDefinition<
+	ServiceActions extends Record<string, Action>,
+	ServiceMixins extends MixinDefinition[],
+> extends ServiceSchema {
+	mixins?: ServiceMixins;
+	actions: {
+		[K in keyof ServiceActions]: Omit<ActionSchema, "params" | "handler"> & {
+			params?: Record<keyof ServiceActions[K]["params"], ActionParamTypes>;
+			handler: ThisType<MergeDeep<ServiceMixins>> &
+				ServiceHandlerFun<ServiceActions[K]["params"], ServiceActions[K]["returns"]>;
+			queue?:
+				| true
+				| (<S extends KeysOfType<ServiceActions, "string">>(
+						ctx: Context<ServiceActions[K], ContextMeta, ContextLocals>,
+						queue: string,
+						event: S,
+						payload: ServiceActions[S],
+						options: { priority: number },
+				  ) => Promise<Job>);
+			graphql?: unknown;
+			localQueue?: <S extends KeysOfType<ServiceActions, "string">>(
+				ctx: Context<ServiceActions[K]["params"], ContextMeta, ContextLocals>,
+				event: S,
+				payload: ServiceActions[S]["params"],
+				options: { priority: number },
+			) => Promise<Job>;
+			logger?: LoggerInstance;
 		};
 	};
+}
 export type ServicePolicies = Array<string>;
 
 export type UserRegistrationAction = Action & {
-	email: string;
-	password: string;
-	passwordConfirmation: string;
+	params: { email: string; password: string; passwordConfirmation: string };
+	returns: { jwt: string };
 };
-export type ServiceTokenAction = MixinFun<{}, { token: string }>;
-export type CheckUserAction = MixinFun<{}, void>;
-export type CheckIsAuthenticatedAction = MixinFun<{}, void>;
-export type CheckUserRoleAction = MixinFun<{}, void>;
-export type IntrospectBearerAction = MixinFun<{}, { token: ParsedJWT }>;
+export type ServiceTokenAction = MixinFun<Action & { returns: { token: string } }>;
+export type CheckUserAction = MixinFun<Action>;
+export type CheckIsAuthenticatedAction = MixinFun<Action>;
+export type CheckUserRoleAction = MixinFun<Action>;
+export type IntrospectBearerAction = MixinFun<Action & { returns: { token: string } }>;
 
 export type UserLoginAction = Action & {
-	email: string;
-	password: string;
+	params: { email: string; password: string };
+	returns: { jwt: string };
 };
 export type VocaCliRunAction = Action;
 
@@ -108,36 +110,56 @@ export type UserResetPasswordAction = Action & {
 };
 
 export type IntrospectAction = Action & {
-	token: string;
+	params: { token: string };
+	returns: ParsedJWT;
 };
 
 export type ParkAction = Action & {
-	template: string;
+	params: { template: string };
+	returns: SerializedJob;
 };
 
-export type EnvironmentStatus = Action & {};
+export type EnvironmentStatus = Action & { returns: { data: any } };
+
 export type GetLabelsAction = Action & {
-	envName: string;
+	params: { envName: string };
+	returns: Record<string, string>;
 };
 export type SetLabelsAction = GetLabelsAction & {
-	labels: Record<string, string>;
+	params: { labels: Record<string, string> };
 };
 export type VaultGetAction = Action & {
-	bucket: string;
-	key: string;
+	params: {
+		bucket: string;
+		key: string;
+	};
 };
 export type VaultSetAction = VaultGetAction & {
-	secrets: Record<string, string>;
+	params: VaultGetAction["params"] & { secrets: Record<string, string> };
+	returns: { code: number };
 };
 export type RoutingAction = Action & {
-	token: string;
+	params: { token: string };
+	returns: { config: Record<string, unknown> };
 };
-export type RoutingTokenAction = Action & {};
+export type RoutingTokenAction = Action & { returns: { token: string } };
 
 export type Credential = Thing & {
-	jwt: string;
+	params: { jwt: string };
 };
-
+export type SerializedJob = Thing & {
+	id: Job["id"];
+	action: string;
+	queue: string;
+	status: JobState | unknown;
+	data: Job["data"];
+	failedReason: Job["failedReason"];
+	progress: Job["progress"];
+	returnvalue: Job["returnvalue"];
+	attemptsMade: Job["attemptsMade"];
+	delay: Job["delay"];
+	timestamp: Job["timestamp"];
+};
 export type ParsedJWT = Thing & {
 	sub: string;
 	aud: string[];
@@ -146,14 +168,13 @@ export type ParsedJWT = Thing & {
 	};
 	active: boolean;
 };
-export type VocaResponse = Thing & {
+export type VocaResponse<T extends any = any> = Thing & {
 	code: number;
-};
-export type VocaError = VocaResponse & {
-	code: number;
+} & T;
+export type VocaError = VocaResponse<{
 	message: string;
 	i18nMessage: string;
-};
+}>;
 
 export type ServiceResponse<T> = VocaResponse & {
 	code: 200 | 201;

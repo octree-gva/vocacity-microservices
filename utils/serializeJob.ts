@@ -1,9 +1,9 @@
 import type { Job } from "bullmq";
-import { create404 } from "./createError";
+import { SerializedJob } from "../types";
 
 const serializeJob = async (job: Job) => {
 	if (!job) {
-		return create404();
+		throw new Error("No job to serialize");
 	}
 	const status = await job.getState();
 	const { serviceName = "unknown" } = job.data.meta || {};
@@ -19,6 +19,6 @@ const serializeJob = async (job: Job) => {
 		attemptsMade: job.attemptsMade,
 		delay: job.delay,
 		timestamp: job.timestamp,
-	};
+	} as SerializedJob;
 };
 export default serializeJob;

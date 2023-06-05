@@ -1,5 +1,6 @@
 import type { VocaResponse } from "../types";
 
-export type CreteSuccessFun = (payload?: any) => VocaResponse;
-const createSuccess: CreteSuccessFun = (payload = {}) => ({ code: 200, ...payload });
+export type CreateSuccessFunc = <T>(payload?: T) => VocaResponse<T>;
+const createSuccess: CreateSuccessFunc = <T>(payload = {} as T) =>
+	({ code: 200, ...payload } as VocaResponse<T>);
 export default createSuccess;

@@ -9,38 +9,38 @@ import {useTheme} from '@mui/system';
 import Banner, {BannerProps} from '../components/Banner';
 
 type AppLayoutProps = React.PropsWithChildren<{
-  headerActions?: React.ReactNode;
-  banner?: BannerProps;
+	headerActions?: React.ReactNode;
+	banner?: BannerProps;
 }>;
 
 const AppLayout = ({children, headerActions, banner}: AppLayoutProps) => {
-  const theme = useTheme();
-  const matches = useMediaQuery(theme.breakpoints.down('sm'));
-  const supportOffset = matches ? 7 : 0;
-  return (
-    <Default>
-      {banner && (
-        <Banner
-          message={banner.message}
-          open={banner.open}
-          onClear={banner.onClear}
-        />
-      )}
-      <Box>
-        <TopBar>{headerActions}</TopBar>
-        <Box
-          sx={{
-            pl: {xs: 0, sm: '80px'},
-            pb: {xs: theme => theme.spacing(10), sm: 0},
-          }}
-        >
-          <LeftBar />
-          {children}
-        </Box>
-        <SupportButton offset={supportOffset} />
-      </Box>
-    </Default>
-  );
+	const theme = useTheme();
+	const matches = useMediaQuery(theme.breakpoints.down('sm'));
+	const supportOffset = matches ? 7 : 0;
+	return (
+		<Default>
+			{banner && (
+				<Banner
+					message={banner.message}
+					open={banner.open}
+					onClear={banner.onClear}
+				/>
+			)}
+			<Box>
+				<TopBar>{headerActions}</TopBar>
+				<Box
+					sx={{
+						pl: {xs: 0, sm: '80px'},
+						pb: {xs: theme => theme.spacing(10), sm: 0},
+					}}
+				>
+					<LeftBar />
+					{children}
+				</Box>
+				<SupportButton offset={supportOffset} />
+			</Box>
+		</Default>
+	);
 };
 
 export default AppLayout;

@@ -16,36 +16,36 @@ import {Session} from 'next-auth';
 const clientSideEmotionCache = createEmotionCache();
 
 interface VocaCityAppProps extends AppProps {
-  emotionCache?: EmotionCache;
-  session: Session | null;
+	emotionCache?: EmotionCache;
+	session: Session | null;
 }
 const apolloClient = new ApolloClient({
-  uri: `/api/graphql`,
-  cache: new InMemoryCache(),
+	uri: `/api/graphql`,
+	cache: new InMemoryCache(),
 });
 
 export default function VocaCityApp(props: VocaCityAppProps) {
-  const {Component, emotionCache = clientSideEmotionCache, pageProps} = props;
+	const {Component, emotionCache = clientSideEmotionCache, pageProps} = props;
 
-  return (
-    <SessionProvider session={pageProps.session}>
-      <ApolloProvider client={apolloClient}>
-        <CacheProvider value={emotionCache}>
-          <Head>
-            <title>My page</title>
-            <meta
-              name="viewport"
-              content="initial-scale=1, width=device-width"
-            />
-          </Head>
-          <ThemeProvider theme={theme}>
-            {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-            <CssBaseline />
-            <Component {...pageProps} />
-            <Toasts />
-          </ThemeProvider>
-        </CacheProvider>
-      </ApolloProvider>
-    </SessionProvider>
-  );
+	return (
+		<SessionProvider session={pageProps.session}>
+			<ApolloProvider client={apolloClient}>
+				<CacheProvider value={emotionCache}>
+					<Head>
+						<title>My page</title>
+						<meta
+							name="viewport"
+							content="initial-scale=1, width=device-width"
+						/>
+					</Head>
+					<ThemeProvider theme={theme}>
+						{/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+						<CssBaseline />
+						<Component {...pageProps} />
+						<Toasts />
+					</ThemeProvider>
+				</CacheProvider>
+			</ApolloProvider>
+		</SessionProvider>
+	);
 }

@@ -14,13 +14,16 @@ import jelastic from "../utils/jelastic";
  * A park is an instance that is linked to no Organisation (for now).
  *
  */
-const EnvInspectService: ServiceDefinition<{
-	summary: EnvironmentStatus;
-	details: EnvironmentStatus;
-}, []> = {
+const EnvInspectService: ServiceDefinition<
+	{
+		summary: EnvironmentStatus;
+		details: EnvironmentStatus;
+	},
+	[]
+> = {
 	name: "env-inspect",
 	settings: {},
-	mixins:[],
+	mixins: [],
 	actions: {
 		details: {
 			params: {},

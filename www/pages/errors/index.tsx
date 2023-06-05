@@ -7,26 +7,26 @@ import SupportButton from '../../containers/SupportButton';
 import Centered from '../../layouts/Centered';
 
 const Errors = () => {
-  const {t} = useTranslation();
-  const router = useRouter();
-  const {errorCode = 'default'} = router.query;
+	const {t} = useTranslation();
+	const router = useRouter();
+	const {errorCode = 'default'} = router.query;
 
-  return (
-    <Centered publicAccess noRedirect>
-      <Box my={4}>
-        <Logo height={60} width={240} />
-      </Box>
-      <Typography my={4} variant="h2">
-        {t(`errors.${errorCode}.title`, {
-          defaultValue: t`errors.default.title`,
-        })}
-      </Typography>
-      <Typography variant="h6">
-        {t(`errors.${errorCode}.desc`, {defaultValue: t`errors.default.desc`})}
-      </Typography>
-      <SupportButton offset={0} />
-    </Centered>
-  );
+	return (
+		<Centered publicAccess noRedirect>
+			<Box my={4}>
+				<Logo height={60} width={240} />
+			</Box>
+			<Typography my={4} variant="h2">
+				{t(`errors.${errorCode}.title`, {
+					defaultValue: t`errors.default.title`,
+				})}
+			</Typography>
+			<Typography variant="h6">
+				{t(`errors.${errorCode}.desc`, {defaultValue: t`errors.default.desc`})}
+			</Typography>
+			<SupportButton offset={0} />
+		</Centered>
+	);
 };
 
 export default Errors;

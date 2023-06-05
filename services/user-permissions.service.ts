@@ -34,14 +34,20 @@ const serializePermissions = (perms: UserPermission[]) =>
 		);
 	}, [] as string[]);
 
-const UserPermissionsService: ServiceDefinition<{
-	register: UserRegistrationAction;
-	login: UserLoginAction;
-	profile: Action;
-	sendResetPassword: Omit<UserLoginAction, "password">;
-	resetPassword: UserResetPasswordAction;
-	introspect: IntrospectAction;
-}, [typeof AuthorizationMixin]> = {
+const UserPermissionsService: ServiceDefinition<
+	{
+		register: UserRegistrationAction;
+		login: UserLoginAction;
+		profile: Action;
+		sendResetPassword: {
+			params: Omit<UserLoginAction["params"], "password">;
+			returns: { ok: boolean };
+		};
+		resetPassword: UserResetPasswordAction;
+		introspect: IntrospectAction;
+	},
+	[typeof AuthorizationMixin]
+> = {
 	name: "user-permissions",
 	mixins: [AuthorizationMixin],
 	settings: {

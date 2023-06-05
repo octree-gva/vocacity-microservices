@@ -17,10 +17,13 @@ import { jelasticToTraefik } from "./helpers/dns.helper";
  * A park is an instance that is linked to no Organisation (for now).
  *
  */
-const DNSService: ServiceDefinition<{
-	routing: RoutingAction;
-	newToken: RoutingTokenAction;
-}, []> = {
+const DNSService: ServiceDefinition<
+	{
+		routing: RoutingAction;
+		newToken: RoutingTokenAction;
+	},
+	[]
+> = {
 	name: "dns",
 	mixins: [],
 	actions: {
@@ -31,7 +34,6 @@ const DNSService: ServiceDefinition<{
 		newToken: {
 			params: {},
 			async handler() {
-				
 				const token = sign("dns.service", ["dns.services"], undefined, "dns", 525949);
 				return createSuccess({ token });
 			},
@@ -61,11 +63,9 @@ const DNSService: ServiceDefinition<{
 				}, {} as any);
 
 				console.log("update config", { traefikConfig });
-
 				return createSuccess({ config: traefikConfig });
 			},
 		},
 	},
 };
 export default DNSService;
-

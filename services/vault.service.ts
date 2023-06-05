@@ -4,10 +4,13 @@ import type { ServiceDefinition, VaultGetAction, VaultSetAction } from "../types
 import { create400, create404, createSuccess } from "../utils/createResponse";
 import vault from "../utils/vault";
 
-const VaultService: ServiceDefinition<{
-	set: VaultSetAction;
-	get: VaultGetAction;
-}, [typeof AuthMixin]> = {
+const VaultService: ServiceDefinition<
+	{
+		set: VaultSetAction;
+		get: VaultGetAction;
+	},
+	[typeof AuthMixin]
+> = {
 	name: "vault",
 	settings: {},
 	mixins: [AuthMixin],

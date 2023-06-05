@@ -18,10 +18,13 @@ import serializeJob from "../utils/serializeJob";
  * A park is an instance that is linked to no Organisation (for now).
  *
  */
-const ParkService: ServiceDefinition<{
-	park: ParkAction;
-	_park: ParkAction;
-}, [typeof BullMqMixin]> = {
+const DecidimParkService: ServiceDefinition<
+	{
+		park: ParkAction;
+		_park: ParkAction;
+	},
+	[typeof BullMqMixin]
+> = {
 	name: "decidim-park",
 	settings: {
 		bullmq: {
@@ -70,14 +73,14 @@ const ParkService: ServiceDefinition<{
 				}
 				await updateProgress(1);
 				const envName = random(23);
-				const responseVault = await ctx.call<{ code: number }, VaultSetAction>(
-					"vault.set",
-					{
-						bucket: "__parked",
-						key: envName,
-						secrets: chart.variables,
-					},
-				);
+				const responseVault = await ctx.call<
+					VaultSetAction["returns"],
+					VaultSetAction["params"]
+				>("vault.set", {
+					bucket: "__parked",
+					key: envName,
+					secrets: chart.variables,
+				});
 				if (responseVault.code > 300) {
 					throw new Error("errors.deployments.vault_error");
 				}
@@ -98,17 +101,20 @@ const ParkService: ServiceDefinition<{
 				}
 				try {
 					await updateProgress(90);
-					await ctx.call<{}, SetLabelsAction>("env-labels.set", {
-						envName,
-						labels: {
-							"voca.parked": "true",
-							"voca.product": "decidim",
-							"voca.url": "http://wait-for-it.voca.city",
-							"traefik.enabled": "true",
-							"traefik.http.routers.decidim.rule": `Host(\`${envName}.voca.city\`)`,
-							"traefik.http.services.decidim.loadbalancer.server": `http://wait-for-it.voca.city`,
+					await ctx.call<SetLabelsAction["returns"], SetLabelsAction["params"]>(
+						"env-labels.set",
+						{
+							envName,
+							labels: {
+								"voca.parked": "true",
+								"voca.product": "decidim",
+								"voca.url": "http://wait-for-it.voca.city",
+								"traefik.enabled": "true",
+								"traefik.http.routers.decidim.rule": `Host(\`${envName}.voca.city\`)`,
+								"traefik.http.services.decidim.loadbalancer.server": `http://wait-for-it.voca.city`,
+							},
 						},
-					});
+					);
 					await updateProgress(100);
 				} catch (e) {
 					// If we can't set the labels, the instance probably is not parked
@@ -119,4 +125,4 @@ const ParkService: ServiceDefinition<{
 		},
 	},
 };
-export default ParkService;
+export default DecidimParkService;

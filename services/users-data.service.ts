@@ -5,18 +5,27 @@ import SqlAdapter from "moleculer-db-adapter-sequelize";
 import Sequelize from "sequelize";
 import type { ServiceDefinition, User } from "../types";
 import { create400, create404, createSuccess } from "../utils/createResponse";
-import AuthorizeMixin, { AuthMixin } from "../mixins/authorize.mixin";
+import AuthorizeMixin from "../mixins/authorize.mixin";
 
 const SALT_ROUND = 12;
 const ALLOWED_CALLERS = ["user-permissions"];
 if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
 	throw new Error("Error: env DATABASE_URL is not defined.");
 }
-const UserDataService: ServiceDefinition<{
-	register: { email: string; password: string };
-	login: { email: string; password: string };
-	resetPassword: { id: string; password: string };
-}, [typeof DbService, typeof AuthorizeMixin]> = {
+const UserDataService: ServiceDefinition<
+	{
+		register: {
+			params: { email: string; password: string };
+			returns: { id: string; email: string };
+		};
+		login: {
+			params: { email: string; password: string };
+			returns: { id: string; email: string };
+		};
+		resetPassword: { params: { id: string; password: string }; returns: {} };
+	},
+	[typeof DbService, typeof AuthorizeMixin]
+> = {
 	name: "users-data",
 	mixins: [DbService, AuthorizeMixin],
 	adapter: new SqlAdapter(process.env.DATABASE_URL || "sqlite::memory"),
@@ -27,9 +36,7 @@ const UserDataService: ServiceDefinition<{
 				password: { type: "string", min: 4 },
 			},
 			async handler(ctx) {
-				const authMethods = this as unknown as AuthMixin["methods"];
-				await authMethods.authorizeService(ctx, ALLOWED_CALLERS);
-
+				await this.authorizeService(ctx, ALLOWED_CALLERS);
 				const adapter = (this as any).adapter as SequelizeDbAdapter;
 				const match = (await adapter.findOne({
 					where: { email: `${ctx.params.email}` },
@@ -53,8 +60,7 @@ const UserDataService: ServiceDefinition<{
 				password: { type: "string", min: 4 },
 			},
 			async handler(ctx) {
-				const authMethods = this as unknown as AuthMixin["methods"];
-				await authMethods.authorizeService(ctx, ALLOWED_CALLERS);
+				await this.authorizeService(ctx, ALLOWED_CALLERS);
 
 				const adapter = (this as any).adapter as SequelizeDbAdapter;
 				const match = (await adapter.findOne({
@@ -75,8 +81,7 @@ const UserDataService: ServiceDefinition<{
 				password: { type: "string", min: 4 },
 			},
 			async handler(ctx) {
-				const authMethods = this as unknown as AuthMixin["methods"];
-				await authMethods.authorizeService(ctx, ALLOWED_CALLERS);
+				await this.authorizeService(ctx, ALLOWED_CALLERS);
 
 				const adapter = (this as any).adapter as SequelizeDbAdapter;
 				const salt = await bcrypt.genSalt(SALT_ROUND);
