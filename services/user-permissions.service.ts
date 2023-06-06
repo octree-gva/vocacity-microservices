@@ -2,7 +2,6 @@ import type { QueryFilters } from "moleculer-db";
 import type {
 	Action,
 	IntrospectAction,
-	IntrospectBearerAction,
 	Organization,
 	ServiceDefinition,
 	ServiceResponse,

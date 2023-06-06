@@ -36,7 +36,7 @@ const authorizeMixin: AuthMixin = {
 		},
 		async authorizeService(ctx, allowedServices) {
 			// Parse the token
-			const parsedToken: ParsedJWT = await ctx.call<ParsedJWT, IntrospectAction>(
+			const parsedToken: ParsedJWT = await ctx.call<IntrospectAction["returns"], IntrospectAction["params"]>(
 				"user-permissions.introspect",
 				{ token: `${ctx.meta.bearer}` },
 			);
@@ -74,7 +74,7 @@ const authorizeMixin: AuthMixin = {
 					token = req.headers.authorization.split(" ")[1];
 				}
 			}
-			const parsedToken: ParsedJWT = await ctx.call<ParsedJWT, IntrospectAction>(
+			const parsedToken: ParsedJWT = await ctx.call<IntrospectAction["returns"], IntrospectAction["params"]>(
 				"user-permissions.introspect",
 				{ token: `${token}` },
 			);

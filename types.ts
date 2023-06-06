@@ -44,7 +44,7 @@ export type MixinFun<T extends Action> = (
 	ctx: Context<T["params"], ContextMeta, ContextLocals>,
 	action?: any,
 	req?: any,
-) => Promise<T["returns"]>;
+) => Promise<T["returns"] extends void ? void : T["returns"]>;
 
 type KeysOfType<T, U> = { [K in keyof T]: K }[keyof T];
 export type ContextMeta = GenericObject & {
@@ -93,10 +93,10 @@ export type UserRegistrationAction = Action & {
 	returns: { jwt: string };
 };
 export type ServiceTokenAction = MixinFun<Action & { returns: { token: string } }>;
-export type CheckUserAction = MixinFun<Action>;
-export type CheckIsAuthenticatedAction = MixinFun<Action>;
-export type CheckUserRoleAction = MixinFun<Action>;
-export type IntrospectBearerAction = MixinFun<Action & { returns: { token: string } }>;
+export type CheckUserAction = MixinFun<Action & { returns: void}>;
+export type CheckIsAuthenticatedAction = MixinFun<Action & { returns: void}>;
+export type CheckUserRoleAction = MixinFun<Action& { returns: void}>;
+export type IntrospectBearerAction = MixinFun<Action & { returns: { token: ParsedJWT } }>;
 
 export type UserLoginAction = Action & {
 	params: { email: string; password: string };
@@ -105,8 +105,8 @@ export type UserLoginAction = Action & {
 export type VocaCliRunAction = Action;
 
 export type UserResetPasswordAction = Action & {
-	newPassword: string;
-	token: string;
+	params: {newPassword: string;
+	token: string;}, returns: {ok: boolean}
 };
 
 export type IntrospectAction = Action & {
