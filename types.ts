@@ -9,6 +9,7 @@ import type {
 	LoggerInstance,
 	ServiceSchema,
 } from "moleculer";
+export type APP_IDS = "decidim" /* | yrpriorities | consul | loomio | etc. */;
 
 export type Thing = {};
 export type Action = Thing & {
@@ -197,3 +198,9 @@ export type UserPermission = {
 	organisation_id: string;
 	permissions: string;
 };
+export type Deployment = {
+	organisation_id: Organization["id"],
+	creator_id: User["id"],
+	env_name: string,
+	app_id: APP_IDS,
+}
