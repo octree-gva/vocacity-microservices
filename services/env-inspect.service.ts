@@ -15,46 +15,46 @@ import jelastic from "../utils/jelastic";
  *
  */
 const EnvInspectService: ServiceDefinition<
-	{
-		summary: EnvironmentStatus;
-		details: EnvironmentStatus;
-	},
-	[]
+  {
+    summary: EnvironmentStatus;
+    details: EnvironmentStatus;
+  },
+  []
 > = {
-	name: "env-inspect",
-	settings: {},
-	mixins: [],
-	actions: {
-		details: {
-			params: {},
-			async handler() {
-				try {
-					const environments = await jelastic.environmentsDetails();
-					return createSuccess({ data: environments });
-				} catch (e) {
-					const { message } = e;
-					if (`${message}`.startsWith("errors.")) {
-						return create400(message);
-					}
-					return create400();
-				}
-			},
-		},
-		summary: {
-			params: {},
-			async handler() {
-				try {
-					const environments = await jelastic.environmentsInfo();
-					return createSuccess({ data: environments });
-				} catch (e) {
-					const { message } = e;
-					if (`${message}`.startsWith("errors.")) {
-						return create400(message);
-					}
-					return create400();
-				}
-			},
-		},
-	},
+  name: "env-inspect",
+  settings: {},
+  mixins: [],
+  actions: {
+    details: {
+      params: {},
+      async handler() {
+        try {
+          const environments = await jelastic.environmentsDetails();
+          return createSuccess({ data: environments });
+        } catch (e) {
+          const { message } = e;
+          if (`${message}`.startsWith("errors.")) {
+            return create400(message);
+          }
+          return create400();
+        }
+      },
+    },
+    summary: {
+      params: {},
+      async handler() {
+        try {
+          const environments = await jelastic.environmentsInfo();
+          return createSuccess({ data: environments });
+        } catch (e) {
+          const { message } = e;
+          if (`${message}`.startsWith("errors.")) {
+            return create400(message);
+          }
+          return create400();
+        }
+      },
+    },
+  },
 };
 export default EnvInspectService;

@@ -8,13 +8,13 @@
  * @param str whatever text
  */
 export const toSlug = (str: string | number) => {
-	let temp = `${str}`.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  let temp = `${str}`.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
-	if (temp[0] < "a" || temp[0] > "z") {
-		temp = `w${temp}`;
-	}
-	while (temp.length < 20) {
-		temp += `${+new Date()}`;
-	}
-	return temp.substring(0, 22);
+  if (temp[0] < "a" || temp[0] > "z") {
+    temp = `w${temp}`;
+  }
+  while (temp.length < 20) {
+    temp += `${+new Date()}`;
+  }
+  return temp.substring(0, 22);
 };

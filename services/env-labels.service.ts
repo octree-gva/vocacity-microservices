@@ -15,57 +15,57 @@ import jelastic from "../utils/jelastic";
  *
  */
 const EnvironmentService: ServiceDefinition<
-	{
-		get: GetLabelsAction;
-		set: SetLabelsAction;
-	},
-	[]
+  {
+    get: GetLabelsAction;
+    set: SetLabelsAction;
+  },
+  []
 > = {
-	name: "env-labels",
-	mixins: [],
-	settings: {},
-	actions: {
-		get: {
-			params: {
-				envName: "string",
-			},
-			async handler({ params }) {
-				try {
-					const labels = await jelastic.labels({
-						envName: params.envName,
-					});
-					return createSuccess(labels);
-				} catch (e) {
-					const { message } = e;
-					if (`${message}`.startsWith("errors.")) {
-						return create400(message);
-					}
-					return create400();
-				}
-			},
-		},
-		set: {
-			params: {
-				envName: "string",
-				labels: "object",
-			},
-			async handler({ params }) {
-				try {
-					await jelastic.setLabels({
-						envName: params.envName,
-						labels: params.labels,
-					});
-				} catch (e) {
-					const { message } = e;
-					if (`${message}`.startsWith("errors.")) {
-						return create400(message);
-					}
-					return create400();
-				}
+  name: "env-labels",
+  mixins: [],
+  settings: {},
+  actions: {
+    get: {
+      params: {
+        envName: "string",
+      },
+      async handler({ params }) {
+        try {
+          const labels = await jelastic.labels({
+            envName: params.envName,
+          });
+          return createSuccess(labels);
+        } catch (e) {
+          const { message } = e;
+          if (`${message}`.startsWith("errors.")) {
+            return create400(message);
+          }
+          return create400();
+        }
+      },
+    },
+    set: {
+      params: {
+        envName: "string",
+        labels: "object",
+      },
+      async handler({ params }) {
+        try {
+          await jelastic.setLabels({
+            envName: params.envName,
+            labels: params.labels,
+          });
+        } catch (e) {
+          const { message } = e;
+          if (`${message}`.startsWith("errors.")) {
+            return create400(message);
+          }
+          return create400();
+        }
 
-				return createSuccess();
-			},
-		},
-	},
+        return createSuccess();
+      },
+    },
+  },
 };
 export default EnvironmentService;

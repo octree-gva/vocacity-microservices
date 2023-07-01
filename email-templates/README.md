@@ -1,3 +1,13 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+- [Email templates by moleculer-mail](#email-templates-by-moleculer-mail)
+  - [Localisation](#localisation)
+  - [Format](#format)
+  - [Naming convention](#naming-convention)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Email templates by [moleculer-mail](https://github.com/moleculerjs/moleculer-addons/tree/master/packages/moleculer-mail#readme)
 
 ## Localisation

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "My Moleculer-based microservices project",
   "scripts": {
+    "precommit": "doctoc .",
     "build-nextjs": "cd www && yarn build",
     "build": "rm -rf dist && npm run build-nextjs && CI=true tsc --project tsconfig.build.json",
     "dev": "ts-node --files ./node_modules/moleculer/bin/moleculer-runner.js --config moleculer.config.ts --hot --repl services/**/*.service.ts --envfile .env",
@@ -38,6 +39,7 @@
     "@typescript-eslint/parser": "^5.44.0",
     "concurrently": "^7.6.0",
     "cross-env": "^7.0.3",
+    "doctoc": "^2.2.1",
     "eslint": "^8.28.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",

@@ -18,54 +18,54 @@ import { jelasticToTraefik } from "./helpers/dns.helper";
  *
  */
 const DNSService: ServiceDefinition<
-	{
-		routing: RoutingAction;
-		newToken: RoutingTokenAction;
-	},
-	[]
+  {
+    routing: RoutingAction;
+    newToken: RoutingTokenAction;
+  },
+  []
 > = {
-	name: "dns",
-	mixins: [],
-	actions: {
-		/**
-		 * Generate a new token for traefik with a validity of one year.
-		 * You are forced to change this credentials every year.
-		 */
-		newToken: {
-			params: {},
-			async handler() {
-				const token = sign("dns.service", ["dns.services"], undefined, "dns", 525949);
-				return createSuccess({ token });
-			},
-		},
-		/**
-		 * HTTP endpoint, will:
-		 * - check all properties of env.
-		 * - get all the traefik.* properties
-		 * - will post the configuration back to traefik.
-		 */
-		routing: {
-			params: { token: "string" },
-			async handler(ctx) {
-				const { token } = ctx.params;
-				const parsedToken = parse(token);
-				ctx.meta.$responseType = "application/json";
-				if (!parsedToken.active) {
-					ctx.meta.$statusCode = "401";
-					return create400("errors.dns.bad_token");
-				}
-				const { data: environments } = await ctx.call<{ data: EnvironmentsDetails[] }>(
-					"env-inspect.details",
-				);
+  name: "dns",
+  mixins: [],
+  actions: {
+    /**
+     * Generate a new token for traefik with a validity of one year.
+     * You are forced to change this credentials every year.
+     */
+    newToken: {
+      params: {},
+      async handler() {
+        const token = sign("dns.service", ["dns.services"], undefined, "dns", 525949);
+        return createSuccess({ token });
+      },
+    },
+    /**
+     * HTTP endpoint, will:
+     * - check all properties of env.
+     * - get all the traefik.* properties
+     * - will post the configuration back to traefik.
+     */
+    routing: {
+      params: { token: "string" },
+      async handler(ctx) {
+        const { token } = ctx.params;
+        const parsedToken = parse(token);
+        ctx.meta.$responseType = "application/json";
+        if (!parsedToken.active) {
+          ctx.meta.$statusCode = "401";
+          return create400("errors.dns.bad_token");
+        }
+        const { data: environments } = await ctx.call<{ data: EnvironmentsDetails[] }>(
+          "env-inspect.details",
+        );
 
-				const traefikConfig = environments.reduce((acc, env) => {
-					return _.merge(acc, jelasticToTraefik(env));
-				}, {} as any);
+        const traefikConfig = environments.reduce((acc, env) => {
+          return _.merge(acc, jelasticToTraefik(env));
+        }, {} as any);
 
-				console.log("update config", { traefikConfig });
-				return createSuccess({ config: traefikConfig });
-			},
-		},
-	},
+        console.log("update config", { traefikConfig });
+        return createSuccess({ config: traefikConfig });
+      },
+    },
+  },
 };
 export default DNSService;
