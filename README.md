@@ -1,3 +1,11 @@
+> !!!
+> ARCHIVED PROJECT
+> This project was a proof of concept, and has been abandonned.
+> The main reason for abandon is:
+>  - Need to re-invent the rule to manage users/authentication
+>  - The code splitting here does not really help in understanding what we are doing.
+
+
 [![Moleculer](https://badgen.net/badge/Powered%20by/Moleculer/0e83cd)](https://moleculer.services)
 
 # micro-voca
